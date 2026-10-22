@@ -1,0 +1,1914 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ハルの恋愛サポートアプリ - 占星術鑑定アシスタント</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Astronomy Engine JS Library -->
+    <script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Zen Maru Gothic"', 'sans-serif'],
+                    },
+                    colors: {
+                        rose: {
+                            50: '#fff1f2',
+                            100: '#ffe4e6',
+                            200: '#fecdd3',
+                            500: '#f43f5e',
+                            600: '#e11d48',
+                            800: '#9f1239',
+                        },
+                        indigo: {
+                            900: '#1e1b4b',
+                            950: '#0f172a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Zen Maru Gothic', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #2e1065 100%);
+            min-height: 100vh;
+            color: #f8fafc;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+        }
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(244, 63, 94, 0.4);
+            transform: translateY(-2px);
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(244, 63, 94, 0.4);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(244, 63, 94, 0.7);
+        }
+    </style>
+</head>
+<body class="p-2 sm:p-4 md:p-6 text-slate-100 min-h-screen">
+
+    <header class="max-w-6xl mx-auto mb-6 text-center">
+        <div class="inline-flex items-center gap-2 bg-pink-500/20 text-pink-300 px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold mb-2 border border-pink-500/30">
+            <i class="fa-solid fa-wand-magic-sparkles text-pink-400"></i> 占星術鑑定サポートツール
+        </div>
+        <h1 class="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-200 bg-clip-text text-transparent">
+            ハルの恋愛サポートアプリ ✨
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-300 mt-1">
+            出生図から惹かれる運命の相手像・引き寄せ期・プログレス月を完全自動算出
+        </p>
+    </header>
+
+    <main class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <section class="lg:col-span-4 space-y-6">
+            <div class="glass-panel p-5 sm:p-6 rounded-2xl shadow-xl">
+                <h2 class="text-lg font-bold text-pink-300 mb-4 flex items-center gap-2 border-b border-white/10 pb-2">
+                    <i class="fa-solid fa-user-astronaut"></i> 相談者（お客様）のデータ
+                </h2>
+
+                <form id="astronomyForm" onsubmit="return handleCalculate(event);" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">お名前・鑑定メモ名</label>
+                        <input type="text" id="clientName" placeholder="例: はるか様" value="相談者様" class="w-full bg-slate-900/60 border border-slate-700 rounded-xl p-2.5 text-sm focus:outline-none focus:border-pink-500 text-slate-100">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">生年月日 <span class="text-pink-400">*</span></label>
+                        <input type="date" id="birthDate" value="1995-07-15" required class="w-full bg-slate-900/60 border border-slate-700 rounded-xl p-2.5 text-sm focus:outline-none focus:border-pink-500 text-slate-100">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="block text-xs font-medium text-slate-300">出生時間</label>
+                            <label class="flex items-center gap-1.5 text-xs text-slate-400 cursor-pointer">
+                                <input type="checkbox" id="unknownTime" onchange="toggleTimeInput()" class="rounded border-slate-700 text-pink-500 focus:ring-pink-500 bg-slate-900"> 時間不明
+                            </label>
+                        </div>
+                        <input type="time" id="birthTime" value="12:00" class="w-full bg-slate-900/60 border border-slate-700 rounded-xl p-2.5 text-sm focus:outline-none focus:border-pink-500 text-slate-100">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">出生地（都道府県/都市）</label>
+                        <select id="birthPlace" class="w-full bg-slate-900/60 border border-slate-700 rounded-xl p-2.5 text-sm focus:outline-none focus:border-pink-500 text-slate-100">
+                            <option value="139.6917,35.6895">東京 (Tokyo)</option>
+                            <option value="135.5023,34.6937">大阪 (Osaka)</option>
+                            <option value="141.3544,43.0621">札幌 (Sapporo)</option>
+                            <option value="140.8719,38.2682">仙台 (Sendai)</option>
+                            <option value="136.9066,35.1815">名古屋 (Nagoya)</option>
+                            <option value="133.2322,35.5036">鳥取・米子 (Tottori)</option>
+                            <option value="133.9344,34.6618">岡山 (Okayama)</option>
+                            <option value="132.4553,34.3853">広島 (Hiroshima)</option>
+                            <option value="130.4017,33.5904">福岡 (Fukuoka)</option>
+                            <option value="127.6792,26.2124">沖縄 (Naha)</option>
+                        </select>
+                    </div>
+
+                    <div class="pt-2">
+                        <label class="block text-xs font-medium text-slate-300 mb-1">鑑定運命カレンダー算出年数</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <span class="text-[10px] text-slate-400">開始年</span>
+                                <input type="number" id="startYear" value="2025" min="2020" max="2040" class="w-full bg-slate-900/60 border border-slate-700 rounded-xl p-2 text-sm text-center text-slate-100">
+                            </div>
+                            <div>
+                                <span class="text-[10px] text-slate-400">算出期間</span>
+                                <select id="yearSpan" class="w-full bg-slate-900/60 border border-slate-700 rounded-xl p-2 text-sm text-slate-100">
+                                    <option value="3">3年間</option>
+                                    <option value="5" selected>5年間</option>
+                                    <option value="10">10年間</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full mt-4 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg transform transition active:scale-98 flex items-center justify-center gap-2 cursor-pointer">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> 運命プロファイル＆年別鑑定を出力
+                    </button>
+                </form>
+            </div>
+
+            <div class="glass-panel p-4 rounded-2xl text-xs text-slate-300 space-y-2 border-l-4 border-amber-400">
+                <div class="font-bold text-amber-300 flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-info"></i> サビアンシンボル自動繰り上げ
+                </div>
+                <p class="leading-relaxed">
+                    アプリ内で12星座各30度のサビアン度数（+1度繰り上げ）を正確に自動計算します。アプリ内のJavaScriptオブジェクトでテキストの編集・差し替えも可能です。
+                </p>
+            </div>
+        </section>
+
+        <section class="lg:col-span-8 space-y-6">
+
+            <!-- Navigation Tabs -->
+            <div class="flex flex-wrap gap-2 border-b border-white/10 pb-3" id="tabNav">
+                <button onclick="switchTab('tab-profile')" id="btn-tab-profile" class="tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-pink-600 text-white shadow-md">
+                    1. 運命の相手像（7天体＋サビアン）
+                </button>
+                <button onclick="switchTab('tab-calendar')" id="btn-tab-calendar" class="tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-slate-800/80 hover:bg-slate-700 text-slate-300">
+                    2. 運命カレンダー（出会いトリガー）
+                </button>
+                <button onclick="switchTab('tab-progress')" id="btn-tab-progress" class="tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-slate-800/80 hover:bg-slate-700 text-slate-300">
+                    3. プログレス（内面の準備期）
+                </button>
+                <button onclick="switchTab('tab-export')" id="btn-tab-export" class="tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-slate-800/80 hover:bg-slate-700 text-purple-300">
+                    <i class="fa-solid fa-copy"></i> 鑑定サマリー出力
+                </button>
+            </div>
+
+            <!-- Tab 1: Profile -->
+            <div id="tab-profile" class="tab-content space-y-4">
+                <div class="glass-panel p-4 rounded-2xl flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                        <h3 class="text-xl font-bold text-pink-300" id="outputClientName">相談者様 の運命プロファイル</h3>
+                        <p class="text-xs text-slate-400" id="outputBirthDetail">生年月日: ---- / 出生地: --</p>
+                    </div>
+                    <div class="text-right text-xs text-pink-200/80 bg-pink-950/40 px-3 py-1.5 rounded-lg border border-pink-500/20">
+                        サビアンシンボルは度数+1度繰り上げ計算済
+                    </div>
+                </div>
+
+                <div id="planetaryProfileGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="col-span-full text-center py-12 text-slate-400">
+                        <i class="fa-solid fa-hand-pointer text-2xl text-pink-400 mb-2"></i>
+                        <p>左側のフォームから「運命プロファイル＆年別鑑定を出力」ボタンを押してください</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Calendar -->
+            <div id="tab-calendar" class="tab-content hidden space-y-4">
+                <div class="glass-panel p-4 rounded-2xl flex justify-between items-center">
+                    <div>
+                        <h3 class="text-lg font-bold text-pink-300">年別 運命の出会い・引き寄せカレンダー</h3>
+                        <p class="text-xs text-slate-400">トランジット天体のアスペクト・ドラゴンヘッド・リターン期から自動検出</p>
+                    </div>
+                    <span class="text-xs bg-indigo-900/60 px-3 py-1 rounded-full text-indigo-300 border border-indigo-500/30" id="calendarPeriodLabel">----年〜----年</span>
+                </div>
+
+                <div id="destinyCalendarTimeline" class="space-y-4">
+                    <div class="text-center py-12 text-slate-400">
+                        計算待ちです...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 3: Progress -->
+            <div id="tab-progress" class="tab-content hidden space-y-4">
+                <div class="glass-panel p-4 rounded-2xl">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <h3 class="text-lg font-bold text-purple-300 flex items-center gap-2">
+                                <i class="fa-solid fa-arrows-spin text-pink-400"></i> プログレス主要4天体＆内面の運命周期（1日1年法）
+                            </h3>
+                            <p class="text-xs text-slate-300 mt-1">
+                                一日一年法で計算した「P太陽・P月・P水星・P金星」の現在地と、心が引き寄せるパートナーシップの黄金期を分析します。
+                            </p>
+                        </div>
+                        <span id="progressTimeStatus" class="text-xs bg-purple-900/50 text-purple-200 px-2.5 py-1 rounded-full border border-purple-500/30">出生時間あり</span>
+                    </div>
+                </div>
+
+                <div id="progressOutputArea" class="space-y-6">
+                    <div class="text-center py-12 text-slate-400">
+                        左側のフォームから「運命プロファイル＆年別鑑定を出力」ボタンを押してください
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 4: Export Summary -->
+            <div id="tab-export" class="tab-content hidden space-y-4">
+                <div class="glass-panel p-4 rounded-2xl space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-bold text-pink-300">鑑定サマリー出力（お客様共有・チャット占い用）</h3>
+                        <button onclick="copySummaryText()" class="bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold py-1.5 px-3 rounded-lg flex items-center gap-1 shadow cursor-pointer">
+                            <i class="fa-regular fa-copy"></i> テキストコピー
+                        </button>
+                    </div>
+                    <p class="text-xs text-slate-400">
+                        チャット占い、鑑定書メール、鑑定時のメモとしてそのままコピーして送信できます。
+                    </p>
+                    <textarea id="summaryTextarea" readonly class="w-full h-96 bg-slate-950/80 border border-slate-700 rounded-xl p-4 text-xs font-mono text-slate-200 leading-relaxed focus:outline-none focus:border-pink-500"></textarea>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <script>
+        // Zodiac sign constants
+        const ZODIAC_SIGNS = [
+            { name: '牡羊座', symbol: '♈', element: '火', mode: '活動' },
+            { name: '牡牛座', symbol: '♉', element: '地', mode: '固定' },
+            { name: '双子座', symbol: '♊', element: '風', mode: '柔軟' },
+            { name: '蟹座',   symbol: '♋', element: '水', mode: '活動' },
+            { name: '獅子座', symbol: '♌', element: '火', mode: '固定' },
+            { name: '乙女座', symbol: '♍', element: '地', mode: '柔軟' },
+            { name: '天秤座', symbol: '♎', element: '風', mode: '活動' },
+            { name: '蠍座',   symbol: '♏', element: '水', mode: '固定' },
+            { name: '射手座', symbol: '♐', element: '火', mode: '柔軟' },
+            { name: '山羊座', symbol: '♑', element: '地', mode: '活動' },
+            { name: '水瓶座', symbol: '♒', element: '風', mode: '固定' },
+            { name: '魚座',   symbol: '♓', element: '水', mode: '柔軟' }
+        ];
+
+        // 7 Planet details with Haru's specific interpretations
+        const PLANET_METADATA = {
+            Sun: {
+                icon: 'fa-sun text-amber-400',
+                title: '☀️ 太陽（結婚・人生のパートナー）',
+                descTitle: '結婚後の二人が目指す人生の方向性・社会的な顔',
+                subTitle: 'あなたが人生の主役として輝くために必要なパートナー像',
+                theme: '人生の舵を一緒に取るキャプテンのような相手。お互いの目標を尊重し合える『共同経営者』的な関係。',
+                // 12星座ごとの太陽（パートナー像）の個別解説
+                signFlavors: {
+                    "牡羊座": {
+                        descTitle: "お互いに自分の道を走りつつ、戦友のように高め合える関係",
+                        subTitle: "常に新しい挑戦やワクワクを共有し、停滞しないアクティブな夫婦像",
+                        theme: "お互いの意思や自立心を尊重し、一緒に新しいフィールドへ飛び出していく『熱い戦友』のようなパートナー。"
+                    },
+                    "牡牛座": {
+                        descTitle: "経済的な安定と、五感で味わう豊かな日常を大切にする関係",
+                        subTitle: "慌ただしい世の中から離れ、ほっと安心できるマイホームを築く夫婦像",
+                        theme: "美味しい食事や美しいインテリアを共に愛で、ゆったりとしたペースで五感の豊かさを分かち合えるパートナー。"
+                    },
+                    "双子座": {
+                        descTitle: "知的な好奇心を刺激し合い、軽やかに会話を楽しむ関係",
+                        subTitle: "マンネリとは無縁で、お友達のように何でもフランクに語り合える夫婦像",
+                        theme: "フットワーク軽くお出かけしたり、新しい情報を面白がってシェアし合える、フレッシュで知的な会話が絶えないパートナー。"
+                    },
+                    "蟹座": {
+                        descTitle: "深い愛情で心を守り合い、温かい家庭の基盤を作る関係",
+                        subTitle: "お互いに一番の理解者となり、プライベートの安心感を最優先にする夫婦像",
+                        theme: "外でどれだけ疲れても、帰ってきたらすべてを優しく受け止めてくれる『絶対的な安心感と心の帰港地』のようなパートナー。"
+                    },
+                    "獅子座": {
+                        descTitle: "お互いを人生の主役として讃え合い、堂々と人生を楽しむ関係",
+                        subTitle: "ドラマティックで華やかさがあり、表現やクリエイティブを分かち合う夫婦像",
+                        theme: "誇り高く、お互いのプライドや輝きをリスペクトし合える、まるで主役カップルのような華やかさと情熱を持つパートナー。"
+                    },
+                    "乙女座": {
+                        descTitle: "細やかな気配りと実務能力で、心地よい生活システムを築く関係",
+                        subTitle: "お互いにサポートし合い、知的で清潔感のあるスマートな暮らしの夫婦像",
+                        theme: "日常生活のルーティンや健康管理をきちんと考え、お互いに痒い所に手が届くような知的で誠実なサポートをし合えるパートナー。"
+                    },
+                    "天秤座": {
+                        descTitle: "洗練されたセンスと心地よいバランスで、社交や美を楽しむ関係",
+                        subTitle: "お互いのプライベートや人間関係を尊重し、スマートに歩み寄る夫婦像",
+                        theme: "美的感覚やスマートなコミュニケーションを大切にし、外から見てもお似合いな『洗練されたスマートカップル』のようなパートナー。"
+                    },
+                    "蠍座": {
+                        descTitle: "他の誰も入り込めない、魂レベルの深い絆で結ばれる関係",
+                        subTitle: "お互いにとことん向き合い、すべてを預け合える究極の信頼関係の夫婦像",
+                        theme: "表面的ではない、お互いの本音や闇の部分さえも丸ごと飲み込んで一体化するような、圧倒的にディープな絆で結ばれるパートナー。"
+                    },
+                    "射手座": {
+                        descTitle: "高い理想や精神的な成長を求め、広い世界へ冒険する関係",
+                        subTitle: "お互いの自由や未来の可能性を束縛せず、共に拡大し続ける夫婦像",
+                        theme: "小さな枠に収まらず、海外や未知のジャンルへ一緒に飛び出していけるような、フロンティア精神にあふれた明るいパートナー。"
+                    },
+                    "山羊座": {
+                        descTitle: "社会的・現実的な目標を二人三脚で確実に達成していく関係",
+                        subTitle: "社会的な信頼や基盤、ライフプランを堅実に築き上げる『最強の戦友』夫婦像",
+                        theme: "地に足がついており、人生の荒波が来ても冷静に現実的な対策を立てて乗り越えていける、圧倒的な安心感と責任感を持つパートナー。"
+                    },
+                    "水瓶座": {
+                        descTitle: "既成概念に囚われず、お互いに自立した対等な同志でいられる関係",
+                        subTitle: "ベタベタした依存をせず、それぞれの個性を面白がり尊重し合う夫婦像",
+                        theme: "夫婦でありながら親友であり、古い慣習に縛られず自分たちの心地よい独自のスタイルを貫いていける、自由で風通しの良いパートナー。"
+                    },
+                    "魚座": {
+                        descTitle: "言葉を超えた共感力で、お互いの優しさやロマンを包み込む関係",
+                        subTitle: "損得勘定のない無条件の愛で結ばれ、精神的な癒やしを分かち合う夫婦像",
+                        theme: "境界線がなく、お互いの夢や感情に深く寄り添い合い、慈愛の心で優しく包み込みながらファンタジーのような世界を共有できるパートナー。"
+                    }
+                }
+            },
+            Moon: {
+                icon: 'fa-moon text-slate-200',
+                title: '🌙 月（素の自分・家庭・心の安らぎ）',
+                descTitle: '家の中で一緒に過ごす時の心地よさ・素の自分をさらけ出せる相手',
+                subTitle: '感情の波をどう受け止めてほしいか・生活習慣の相性',
+                theme: '言葉がなくても隣にいるだけで落ち着く相手。素顔のあなたを丸ごと包み込んでくれる『心の帰港地』。',
+                // 12星座ごとの月（家庭・プライベートの安らぎ）の個別解説
+                signFlavors: {
+                    "牡羊座": {
+                        descTitle: "お互いに干渉しすぎず、サッパリしていて気持ちの切り替えが早い関係",
+                        subTitle: "カッとなっても引きずらず、家の中ではのびのびと素直でいられる空気感",
+                        theme: "気を使わず、言いたいことをその場でサッパリ言い合える。プライベートではお互いに自由でのびのび過ごせるサッパリした家庭環境。"
+                    },
+                    "牡牛座": {
+                        descTitle: "美味しいごはんや心地いいインテリアに囲まれた、五感が満たされる関係",
+                        subTitle: "慌ただしい日常を忘れ、お家でまったりと安心感を味わえるプライベート",
+                        theme: "お気に入りのソファや美味しいおやつを共にして、ただ静かに同じ空間にいるだけで深く癒やされる、スローで安心感に満ちたおうち時間。"
+                    },
+                    "双子座": {
+                        descTitle: "今日あった面白いことや世間話を、くだらない笑いに変えて話せる関係",
+                        subTitle: "空気感がいつも軽やかで、お互いのプライベートの領域を尊重し合う距離感",
+                        theme: "沈黙が気まずくなく、家の中でもおしゃべりが弾む。情報やちょっとしたユーモアを軽やかに共有し合える、風通しの良いお部屋の空気。"
+                    },
+                    "蟹座": {
+                        descTitle: "外で傷ついた心を完全に癒やしてくれる、絶対的な安心感と温もり",
+                        subTitle: "家族のように深く心を許し合い、お互いの感情に優しく寄り添い合う関係",
+                        theme: "ただ「おかえり」と迎えてもらえるだけでホッとする。お互いの機嫌や感情の波を敏感に察し合い、まるでお母さんのように包み込む温かいおうち。"
+                    },
+                    "獅子座": {
+                        descTitle: "家の中ではお互いに素直に甘え合い、笑顔と遊び心を忘れない関係",
+                        subTitle: "「すごいね！」と褒め合ったり、リラックスして楽しく笑い合える空間",
+                        theme: "外では頑張っている自分を、家の中では「よくやっているね」と無条件に肯定し、子どもっぽさや無邪気さを丸ごと出せる明るいリビング。"
+                    },
+                    "乙女座": {
+                        descTitle: "生活リズムや衛生観念がピタリと合い、お互いに心地よい秩序がある関係",
+                        subTitle: "細やかな気配りが行き届き、安心して日常のルーティンをこなせる空間",
+                        theme: "散らかった部屋やルーズさにイライラせず、お互いにスマートに家事や日常をシェアしながら、整った環境で静かにリラックスできる暮らし。"
+                    },
+                    "天秤座": {
+                        descTitle: "お互いのプライベートな領域や一人の時間を上品に尊重し合う関係",
+                        subTitle: "家の中でもお互いに不快な思いをさせず、穏やかなトーンで会話する空間",
+                        theme: "ベタベタしすぎて息が詰まることがなく、お互いの美的センスや心地よい距離感を保ちながら、優雅で穏やかな空気を共有できる住まい。"
+                    },
+                    "蠍座": {
+                        descTitle: "言葉がなくても魂レベルで安心でき、すべてをさらけ出せる究極の隠れ家",
+                        subTitle: "外の世界を完全に遮断し、二人だけのディープな世界に深く浸れる空間",
+                        theme: "他の誰にも見せない本当の弱音や感情を、ただ静かに、深く受け止めてくれる。外の世界の喧騒から完全に守られた、二人だけの聖域のようなお家。"
+                    },
+                    "射手座": {
+                        descTitle: "細かいルールに縛られず、おおらかでのびのびと笑い合える関係",
+                        subTitle: "多少のことは気にしない大らかさがあり、開放的な気分で過ごせる空間",
+                        theme: "細かい日常の雑事にイライラせず、「まあいっか！」と笑い飛ばせる。窮屈さが一切なく、精神的にいつも自由で広々とした空気感の家庭。"
+                    },
+                    "山羊座": {
+                        descTitle: "生活の基盤や現実的な役割分担がしっかりしていて、抜群の安定感がある関係",
+                        subTitle: "将来への不安がなく、安心してどっしりと地に足をつけられる暮らし",
+                        theme: "経済的なことや生活のシステムが堅実に回っており、どんな時でも「ここに行けば絶対に大丈夫」という頼もしさと現実的な安心感があるお家。"
+                    },
+                    "水瓶座": {
+                        descTitle: "お互いに一人の時間や趣味を大切にしながら、干渉しすぎないドライな関係",
+                        subTitle: "「家族だからこうあるべき」という固定観念がなく、フラットで自由な空気",
+                        theme: "同じ部屋にいても、それぞれが好きなことに没頭していて心地よい。プライベートの自由と自立が完璧に守られている、サッパリしたスマートな空間。"
+                    },
+                    "魚座": {
+                        descTitle: "お互いの優しさやナイーブさにそっと寄り添い、癒やし合うファンタジーな空間",
+                        subTitle: "外の世界のピリピリ感をすべて洗い流してくれる、慈愛に満ちた心のオアシス",
+                        theme: "現実の厳しさを忘れ、お風呂やベッドの中で今日あった不安を優しく溶かし合える。お互いの夢やエモーショナルな心にどこまでも優しく溶け込むお部屋。"
+                    }
+                }
+            },
+            Mercury: {
+                icon: 'fa-comments text-cyan-300',
+                title: '💡 水星（会話・価値観・知的な波長）',
+                descTitle: 'どんな会話やコミュニケーションで心がときめくか',
+                subTitle: '思考のテンポ・価値観の共有・ユーモアのセンス',
+                theme: 'くだらない雑談から深い議論まで、夜通し話しても飽きない『親友のような相手』。言葉のセンスに惹かれる関係。',
+                // 12星座ごとの水星（知性・会話の波長）の個別解説
+                signFlavors: {
+                    "牡羊座": {
+                        descTitle: "テンポが速く、お互いの思いつきや直感を即座に面白がれる会話",
+                        subTitle: "回りくどい表現はなし！結論ファーストで熱く語り合える知的な波長",
+                        theme: "「これ面白そう！」と思った瞬間にパッと話題を振れて、テンポよく意見をぶつけ合える。スピード感と熱量が一致するストレートな会話。"
+                    },
+                    "牡牛座": {
+                        descTitle: "焦らされず、自分のペースでじっくりと言葉を選んで分かり合える会話",
+                        subTitle: "日々の美味しいものや五感の感動を、穏やかなトーンで共感し合う波長",
+                        theme: "慌ただしいおしゃべりではなく、お互いのペースを尊重しながら、心地よい言葉や好きなものの話をまったりと味わうように分かち合える会話。"
+                    },
+                    "双子座": {
+                        descTitle: "次から次へと新しい話題が飛び出し、時間を忘れて盛り上がれる知的会話",
+                        subTitle: "トレンド、ニュース、ちょっとしたユーモアを軽やかにキャッチし合う波長",
+                        theme: "「そうそう、それ！」とツッコミとボケが絶妙に噛み合い、どんなに話してもネタが尽きない、まるで大親友のような軽快で楽しいおしゃべり。"
+                    },
+                    "蟹座": {
+                        descTitle: "論理や正しさよりも、「共感」や「温かい感情」を分かち合える会話",
+                        subTitle: "心の中にある本音や、今日あった出来事を優しく受け止め合う波長",
+                        theme: "「大変だったね」「嬉しかったね」と、感情の機微を真っ先に分かち合える。言葉の裏にある優しさや思いやりを自然にキャッチし合える会話。"
+                    },
+                    "獅子座": {
+                        descTitle: "お互いのこだわりや推しへの情熱を、ドラマティックに楽しく語り合う会話",
+                        subTitle: "褒め合ったり、笑い声が絶えない華やかでエンタメ感のある波長",
+                        theme: "自分の好きなことや表現したいものを「いいね！」と大きく面白がってくれて、話しているだけでお互いの自信とテンションが上がっていく会話。"
+                    },
+                    "乙女座": {
+                        descTitle: "知的好奇心を刺激する情報や、役に立つ知恵をスマートに交換し合う会話",
+                        subTitle: "言葉のチョイスが的確で、お互いにツボを突いた鋭いユーモアが通じる波長",
+                        theme: "細やかな気配りや知的な分析力がピタリと一致。「それ知りたかった！」という実用的な情報や、クスッと笑えるウィットに富んだやり取り。"
+                    },
+                    "天秤座": {
+                        descTitle: "お互いの考えを尊重し、押しつけ合わずに優雅で心地よいバランスを保つ会話",
+                        subTitle: "洗練されたトーンで、社会や美意識、人間関係について客観的に語り合う波長",
+                        theme: "感情的な言い争いにならず、スマートに「なるほど、そういう視点もあるね」とお互いの価値観を認め合える、品のある洗練された対話。"
+                    },
+                    "蠍座": {
+                        descTitle: "表層的な雑談を超えて、お互いの本音やディープな秘密まで打ち明け合える会話",
+                        subTitle: "一目置くような深い洞察力で、言葉の奥にある真実を理解し合う波長",
+                        theme: "他の人には言えない弱音や人生のディープなテーマも、この人となら安心して語り合える。嘘や誤魔化しのない、魂に通じ合う密密なコミュニケーション。"
+                    },
+                    "射手座": {
+                        descTitle: "宇宙や未来、人生の哲学など壮大なテーマをワクワクしながら語り合う会話",
+                        subTitle: "細かいことにこだわらず、おおらかな視点で知的好奇心を拡大し合う波長",
+                        theme: "「世界って広いよね！」「こんな未来はどう？」と、会話をするたびに自分の世界観が大きく広がっていくような、自由でオープンな知的探求の会話。"
+                    },
+                    "山羊座": {
+                        descTitle: "現実的な目標やキャリア、将来のビジョンについて堅実に語り合える会話",
+                        subTitle: "口先だけではない信頼感と、社会通念や長期的プランの感覚が一致する波長",
+                        theme: "「これからどう生きていくか」を具体的にブレストでき、お互いの建設的なアドバイスがすんなり胸に落ちる、地に足の着いた誠実なやり取り。"
+                    },
+                    "水瓶座": {
+                        descTitle: "常識や固定観念に縛られず、ユニークな視点やアイディアを対等に面白がる会話",
+                        subTitle: "ベタベタした同調を求めず、お互いの異なる意見を「面白いね！」と認め合う波長",
+                        theme: "「普通はこう」という押し付けが一切なく、マニアックな話題や新しいテクノロジー、未来の生き方についてフラットに意見交換できる風通しの良い対話。"
+                    },
+                    "魚座": {
+                        descTitle: "言葉の意味そのものよりも、声のトーンや雰囲気に込められた優しさを感じ取る会話",
+                        subTitle: "夢やインスピレーション、情緒的な世界をロマンチックに語り合える波長",
+                        theme: "理屈や正論で追い詰めることがなく、お互いの曖昧な表現やセンチメンタルな気持ちを「わかるよ」と丸ごと優しく包み込んでくれるファンタジックな会話。"
+                    }
+                }
+            },
+            Venus: {
+    icon: 'fa-heart text-pink-400',
+    title: '💖 金星（恋愛のトキメキ・引き寄せの魅力・愛され方）',
+    descTitle: 'あなたが恋に落ちる瞬間の美学・惹きつける魅力（愛の表現）',
+    subTitle: 'どんな風に愛されると幸せを感じるか',
+    theme: 'あなたの五感や感性を刺激し、優しく甘やかしてくれる相手。一緒に美味しいものを食べたり美しいものを愛でる恋。',
+    // 12星座ごとの金星（恋愛の美学・愛され方）の個別解説
+    signFlavors: {
+        "牡羊座": {
+            descTitle: "相手が自分にまっすぐ一途に惚れ込んでくれる情熱的なアプローチ",
+            subTitle: "「君しかいない！」とストレートに追われることで一気に恋に落ちる瞬間",
+            theme: "回りくどい駆け引きはなし！少年少女のように真っすぐで熱い想いをぶつけられ、「俺（私）が守る！」と男気や直球の愛を示されるとき。"
+        },
+        "牡牛座": {
+            descTitle: "高級感のあるレストランや心地よい空間で、五感を満たしてくれるデート",
+            subTitle: "美味しいものを美味しそうに食べ、肌触りの良いものや美しい美術を愛でる愛",
+            theme: "ただ「好き」と言うだけでなく、美味しいお肉をご馳走してくれたり、優しく頭をなでてくれたり、物質的・身体的な温もりや贅沢をたっぷり味あわせてくれるとき。"
+        },
+        "双子座": {
+            descTitle: "一緒にいて全く退屈せず、お洒落なカフェで流行りの話題を軽やかに楽しむ恋",
+            subTitle: "束縛されず、お互いのフットワークの軽さやスマートなセンスにときめく瞬間",
+            theme: "「今度ここ行こうよ！」とフットワーク軽くお出かけに誘ってくれたり、センスのいい褒め言葉やユーモアで、会話のキャッチボールを心から楽しめるとき。"
+        },
+        "蟹座": {
+            descTitle: "自分を特別扱いしてくれて、家族や身内のようにとことん大切に守ってくれる愛",
+            subTitle: "「体調大丈夫？」と細やかに気遣われ、心の底から安心感で満たされる瞬間",
+            theme: "外で見せる顔とは違う、自分だけに向けられるトロ甘い眼差しや、「僕がずっとそばにいるよ」という絶対的な包容力・無条件の庇護を感じられるとき。"
+        },
+        "獅子座": {
+            descTitle: "まるで映画のワンシーンのように、情熱的でドラマティックに特別扱いされる恋",
+            subTitle: "「君が一番美しい！」と世界中で自分だけを讃え、盛大にエスコートされる瞬間",
+            theme: "人目を気にせず、ロマンチックなサプライズやストレートな賛辞を贈ってくれる。私の輝きや存在そのものを、世界で一番誇らしそうに愛でてくれるとき。"
+        },
+        "乙女座": {
+            descTitle: "自分の好みを完璧にリサーチしてくれて、かゆい所に手が届くスマートな優しさ",
+            subTitle: "「よく頑張ってるね」と日頃の努力や小さな変化に気づいて褒められる瞬間",
+            theme: "大雑把なアプローチではなく、さりげない気遣いや清潔感のあるスマートなエスコート、そして「君のそういう真面目なところが好きだよ」と内面を丁寧に認められるとき。"
+        },
+        "天秤座": {
+            descTitle: "絵画のように洗練されたロマンチックなシチュエーションと、スマートな紳士的エスコート",
+            subTitle: "お互いの美意識やセンスを褒め合い、優雅で美しい大人の恋を楽しむ瞬間",
+            theme: "身なりやマナーが洗練されていて、一緒に並んで歩いているだけで誇らしくなるような、お洒落でスマートなレディファーストの扱いを受けるとき。"
+        },
+        "蠍座": {
+            descTitle: "世界中を敵に回しても自分だけを愛し抜いてくれるような、圧倒的な執着と独占欲",
+            subTitle: "他の人には見せない泥臭い本音や、熱すぎる愛の重さを丸ごと受け取る瞬間",
+            theme: "「もう他の人柄なんて見えない」と、魂の底から自分に溺れてくれている確信を持てるとき。生半可ではない、命がけのような熱い愛を向けられるとき。"
+        },
+        "射手座": {
+            descTitle: "一緒に未知の国へ旅行したり、壮大な未来の夢をワクワクしながら語り合う冒険の恋",
+            subTitle: "窮屈なルールに縛られず、「お互いの自由」を祝福し合いながらオープンに愛し合う瞬間",
+            theme: "「面白いところがあるんだ、行こう！」と新しい世界へ連れ出してくれたり、小さなことで嫉妬せず、おおらかに自分の可能性を面白がって応援してくれるとき。"
+        },
+        "山羊座": {
+            descTitle: "その場限りの口だけではなく、結婚や将来を見据えた現実的で誠実なアプローチ",
+            subTitle: "社会的責任を果たし、自分との未来を真剣に背負おうとしてくれる男気・誠実さ",
+            theme: "軽薄なナンパや遊びではなく、きちんと仕事や人生に向き合っている姿を見せられ、「この人なら私の将来を任せられる」という絶対的な信頼と誠実さを感じられるとき。"
+        },
+        "水瓶座": {
+            descTitle: "恋人同士でありながら最高の親友のように、ベタベタせず対等に尊重し合える関係",
+            subTitle: "「変わってるね、でもそこが最高に好き！」と自分の個性を面白がり愛される瞬間",
+            theme: "世間の「こうあるべき恋愛」の常識に縛られず、お互いのプライベートな世界やマニアックな趣味を、「それ面白いね！」とフラットに尊重し合えるとき。"
+        },
+        "魚座": {
+            descTitle: "すべてを溶かしてしまうような、甘々でロマンチックなメルヘン世界での大恋愛",
+            subTitle: "「可愛いね、愛してるよ」と、限界まで甘やかされ、無条件の優しさに包まれる瞬間",
+            theme: "現実のイヤなことをすべて忘れさせてくれるような、優しいハグや甘い言葉、そして損得勘定なしのピュアな慈愛で、トロトロに蕩けるような愛を注がれるとき。"
+        }
+    
+
+                }
+            },
+            Mars: {
+    icon: 'fa-fire text-rose-500',
+    title: '🔥 火星（情熱のスイッチ・本能的な惹かれ合い・行動力）',
+    descTitle: 'どんな相手に理屈抜きで本能的に惹かれてしまうか（パッション）',
+    subTitle: '恋の主導権や、衝突したときの乗り越え方',
+    theme: 'あなたの心の火をつけ、迷っている背中を力強く押してくれる相手。本能的な引き寄せと強い情熱を燃やす恋。',
+    // 12星座ごとの火星（情熱・本能的な惹かれ方・衝突時の乗り越え方）の個別解説
+    signFlavors: {
+        "牡羊座": {
+            descTitle: "自分と同じかそれ以上にアグレッシブで、直感的に「この人だ！」と燃え上がる相手",
+            subTitle: "お互いに一歩も引かない熱いエネルギーを持ち、ぶつかっても即座にサッパリ和解する",
+            theme: "草食系やモジモジした人ではなく、猪突猛進にアプローチしてくる男気や勢いに本能が反応する。ケンカしてもその場で怒りを爆発させてすぐケロッと元に戻る熱血な関係。"
+        },
+        "牡牛座": {
+            descTitle: "普段は物静かだけど、いざという時の「ここぞ」という場面での底知れない頑固さと色気",
+            subTitle: "感情的にキーキー言い争うのではなく、お互いに沈黙で頑として譲らない持久戦",
+            theme: "普段はおっとりしているのに、自分のテリトリーや譲れないこだわりを守る時の圧倒的な男気や、五感を刺激する色気に抗えず本能的に惹かれる。"
+        },
+        "双子座": {
+            descTitle: "頭の回転が速く、口喧嘩でテンポよく軽妙なツッコミを入れ返してくる小気味よさ",
+            subTitle: "いつまでもネチネチ引きずらず、言葉の応酬でスカッと笑い合って終わるケンカ",
+            theme: "重苦しい雰囲気や深刻なムードが苦手。お互いにフットワーク軽く、議論や軽口を叩き合いながら、知的な刺激でパッションを燃え上がらせる関係。"
+        },
+        "蟹座": {
+            descTitle: "自分の大切な人や家族を命がけで守ろうとする、熱すぎる防衛本能と男気・母性",
+            subTitle: "感情がぶつかり合うと涙を流したり感情的になるが、最後は「好き」の温もりで溶ける",
+            theme: "理屈ではなく「この人を守りたい、守られたい」というエモーショナルな防御本能が刺激される。敵対した時は激しいが、味方になると絶対的な強さを発揮する愛。"
+        },
+        "獅子座": {
+            descTitle: "堂々としたスター性があり、ドラマの主人公のように情熱的で大胆なアプローチ",
+            subTitle: "お互いのプライドがぶつかり合うと一歩も引かないが、褒められると一瞬で許してしまう",
+            theme: "小さくまとまった人ではなく、どこか派手で華やか、自分を大きく男らしく（女らしく）リードしてくれる圧倒的な存在感とパフォーマンスに本能がときめく。"
+        },
+        "乙女座": {
+            descTitle: "仕事やピンチの場面で、的確な分析力と実務能力でテキパキと問題を解決する有能さ",
+            subTitle: "感情的に怒鳴り合うのではなく、お互いの至らない点を論理的・効率的に正し合う",
+            theme: "無鉄砲な情熱ではなく、「この人についていけば実務も生活も完璧に回る」という頼もしさや、細やかなプロフェッショナルな仕事ぶりにグッと惹かれる。"
+        },
+        "天秤座": {
+            descTitle: "直球でガツガツ来られるのは苦手だが、洗練されたスマートな押し引きとスマートな色気",
+            subTitle: "直接的な大喧嘩を極端に嫌い、お互いに上品なディベートや大人の話し合いで解決する",
+            theme: "泥臭いアプローチやガサツさは論外。あくまでスマートに、お互いのメンツやバランスを保ちながら、優雅に主導権を握り合うような洗練された駆け引き。"
+        },
+        "蠍座": {
+            descTitle: "表向きは冷静なのに、その奥底に隠されたマグマのような激しい独占欲と色気",
+            subTitle: "怒らせると一番怖いタイプだが、一度結ばれたら絶対に裏切らない究極の絆",
+            theme: "軽いノリの恋なんてあり得ない。「私（僕）のすべてを奪ってほしい」と思わせるような、目線だけでゾクッとするような圧倒的な色気と、底知れない執着心。"
+        },
+        "射手座": {
+            descTitle: "未知の分野に飛び込んでいくフロンティア精神や、どんな逆境も笑い飛ばす圧倒的な楽観性",
+            subTitle: "カッとなっても「ま、いっか！」とすぐに視線が未来に向き、過去のいざこざを引きずらない",
+            theme: "小さなことでネチネチ束縛されるのが一番嫌い。お互いに「もっと遠くへ行こうぜ！」と背中をドカンと叩いてくれるような、冒険心あふれる豪快な情熱。"
+        },
+        "山羊座": {
+            descTitle: "いざという時に絶対にブレない責任感と、社会の荒波をサバイブする現実的な強さ",
+            subTitle: "感情論でヒステリックにならず、現実的な解決策と責任の所在をハッキリさせて構築する",
+            theme: "口先だけのロマンチストではなく、「私がこの生活を絶対に支えてみせる」という背中で語る圧倒的な社会性と、泥臭く這い上がるタフさに本能がしびれる。"
+        },
+        "水瓶座": {
+            descTitle: "既存のルールや「カップルとはこうあるべき」を軽々とブチ壊す反骨精神と天才肌",
+            subTitle: "感情的な衝突の代わりに、なぜそう思ったのかを客観的・論理的にプレゼンし合う",
+            theme: "ベタベタした依存や嫉妬のエネルギーがゼロ。お互いに「個人の自由」を死守しつつ、社会の常識に囚われないユニークな野望を面白がり合える関係。"
+        },
+        "魚座": {
+            descTitle: "こちらの境界線を優しく溶かしてしまうような、抗えない甘さと自己犠牲的なほどの包容力",
+            subTitle: "強く言い返されるとシュンと萎縮してしまうが、最後はたっぷりのスキンシップで和解",
+            theme: "戦う強さよりも、すべてを受け入れてくれるような母性や、アーティスト・表現者としてのアンニュイな色気、守ってあげたくなるような危うさに堕ちてしまう。"
+        }
+    
+
+                }
+            },
+            Jupiter: {
+    icon: 'fa-crown text-amber-300',
+    title: '⚙️ 木星（縁の拡大・人生の祝福・豊かさをもたらす人）',
+    descTitle: '出会うことであなたの世界や才能を無限に広げてくれる人',
+    subTitle: '二人でいると運気が上がる『最高の幸運のキーパーソン』',
+    theme: 'あなたの可能性を一切否定せず、『大丈夫だよ！』と広い心で受け入れて世界を広げてくれる『恩人のような相手』。',
+    // 12星座ごとの木星（拡大・豊かさ・幸運のキーパーソン）の個別解説
+    signFlavors: {
+        "牡羊座": {
+            descTitle: "「迷ってるならやっちゃおうよ！」と、あなたの挑戦の背中をドカンと押してくれる人",
+            subTitle: "失敗を恐れる気持ちを一瞬で吹き飛ばし、新しい世界へ真っ先に連れ出してくれる幸運",
+            theme: "あなたの「やりたい！」という衝動を一切否定せず、一番のサポーターとして一緒に飛び込んでくれる。二人でいると行動力と引き寄せ力が爆発的に高まるパートナー。"
+        },
+        "牡牛座": {
+            descTitle: "五感の贅沢や実質的な豊かさ（経済・心地よい暮らし）を安定して与えてくれる人",
+            subTitle: "慌ただしい日常から離れ、豊かで上質な本物の価値観を教えてくれる幸運",
+            theme: "美味しいものを分かち合い、手触りの良い生活基盤を一緒に築いてくれる。「この人といると生活が豊かになり、心も体も満たされる」という実利的な祝福をもたらすパートナー。"
+        },
+        "双子座": {
+            descTitle: "新鮮な情報、面白い人脈、軽やかな話題を次々に持ち込んで世界を広げてくれる人",
+            subTitle: "思考の枠をガラッと変えてくれ、あなたの知的好奇心を常にワクワク刺激する幸運",
+            theme: "「こんな世界もあるんだよ！」とフットワーク軽く色々な場所へ連れ出してくれ、おしゃべりしているだけであなたの視野や選択肢が何倍にも広がっていくパートナー。"
+        },
+        "蟹座": {
+            descTitle: "あなたの弱い部分や過去の傷までまるごと包み込み、絶対的な味方でいてくれる人",
+            subTitle: "「ここに戻ってくれば大丈夫」と思える心の温かい居場所と家族愛を与えてくれる幸運",
+            theme: "損得勘定抜きの深い愛情で家庭や身内としての土台を守り、あなたの情操や心の豊かさを何倍にも育んでくれる、お母さんのような温かい包容力を持つパートナー。"
+        },
+        "獅子座": {
+            descTitle: "あなたの才能や魅力を全力で絶賛し、人生の表舞台へと引っ張り出してくれる人",
+            subTitle: "自己肯定感を最高潮まで高めてくれ、自信を持って堂々と輝けるようになる幸運",
+            theme: "「君は最高のスターだよ！」と本気で信じて称えてくれる。二人でいると人生がドラマティックで華やかなステージへと変わり、自己表現の可能性が無限に開けるパートナー。"
+        },
+        "乙女座": {
+            descTitle: "ごちゃごちゃしていた日常や課題を整理整頓し、生活や健康をスマートに整えてくれる人",
+            subTitle: "かゆい所に手が届く細やかなサポートで、あなたの本当の力を発揮させてくれる幸運",
+            theme: "あなたの夢や目標を、現実的なステップに落とし込んで着実に叶えられるように助けてくれる。「この人といると生活が整い、仕事も人生も順調に回り出す」という有能なパートナー。"
+        },
+        "天秤座": {
+            descTitle: "素晴らしい人間関係や洗練された社交場へとあなたを導き、人脈を広げてくれる人",
+            subTitle: "物事を多角的に見せてくれ、スマートで美しい調和のある人生へと引き上げてくれる幸運",
+            theme: "あなたに欠けていた視点を優雅に補い、外の世界との良質な縁をどんどん繋いでくれる。「二人で並ぶことで社会的にも認められ、世界が華やぐ」という洗練されたパートナー。"
+        },
+        "蠍座": {
+            descTitle: "表層的な付き合いではなく、魂の深い部分で結びつき、人生の変容をもたらしてくれる人",
+            subTitle: "お互いのリソースや深い財産を分かち合い、根本からの再生とパワーを与えてくれる幸運",
+            theme: "あなたの深い闇や本音すら恐れずに受け止め、二人だけの絶対的な絆を築いてくれる。出会うことであなたの秘められた潜在能力や運命が劇的に覚醒するパートナー。"
+        },
+        "射手座": {
+            descTitle: "ちっぽけな悩みや常識を吹き飛ばし、海外や専門分野など広い未来へ連れ出してくれる人",
+            subTitle: "「世界はこんなに広くて自由なんだ！」と、人生の哲学と大きな夢を与えてくれる幸運",
+            theme: "スケールの大きい楽観性と広い視野を持ち、あなたの可能性に一切の限界を作らない。「大丈夫、世界は広いよ！」と笑い飛ばしながら、共に成長し続けられる最高の先導者。"
+        },
+        "山羊座": {
+            descTitle: "あなたの夢や目標を「一時の夢幻」で終わらせず、社会的な形・実績として完成させてくれる人",
+            subTitle: "着実な信頼と現実的な基盤を築き上げ、長期的でゆるぎない成功をもたらしてくれる幸運",
+            theme: "社会的な立場や責任を一緒に背負い、地に足のついた成果を一緒に作っていける。「この人といると社会的な信頼や地位が高まり、目標が必ず形になる」という頼もしいパートナー。"
+        },
+        "水瓶座": {
+            descTitle: "古い価値観や「〜すべき」という縛りからあなたを解き放ち、自由にしてくれる人",
+            subTitle: "あなたの個性や変わった部分を「最高の魅力」として面白がり、尊重してくれる幸運",
+            theme: "常識にとらわれないネットワークや未来志向のアイディアをもたらし、対等な親友のように互いの自由を祝福し合える。あなたの個性を100%開花させてくれる風通しの良いパートナー。"
+        },
+        "魚座": {
+            descTitle: "殺伐とした現実のピリピリ感を消し去り、無限の優しさと無条件の愛で癒やしてくれる人",
+            subTitle: "損得勘定のない慈愛で寄り添い、あなたの感性やインスピレーションを豊かに育む幸運",
+            theme: "言葉や理屈を超えた安心感を与え、お互いの存在そのものを丸ごと祝福し合える。「この人といると心が洗われ、優しくなれる」という、慈愛とロマンに満ちたオアシスのようなパートナー。"
+        }
+    
+
+                }
+            },
+            Saturn: {
+    icon: 'fa-shield-halved text-indigo-400',
+    title: '🪐 土星（長期的な絆・試練の乗り越え・信頼の構築）',
+    descTitle: '時間をかけてじっくり育てる、揺るぎない信頼関係',
+    subTitle: '二人で乗り越える人生の宿題・責任感・長続きの秘訣',
+    theme: '最初は少し厳しく感じるかもしれないけれど、時間が経つほどに絆が深まり、絶対に裏切らない『一番固い絆で結ばれる相手』。',
+    // 12星座ごとの土星（長期的な試練・責任・長続きの秘訣）の個別解説
+    signFlavors: {
+        "牡羊座": {
+            descTitle: "お互いの「自分を曲げない頑固さ」がぶつかる試練を、直球の対話でクリアしていく関係",
+            subTitle: "焦らず、お互いのスピードの違いや自己主張の強さを時間をかけて認め合う大人の忍耐",
+            theme: "最初は自分の意見を譲れずカッとなりやすいけれど、時間を経るごとに「相手には相手の戦い方がある」とリスペクトが生まれ、絶対に崩れない戦友のような絆へと育つ関係。"
+        },
+        "牡牛座": {
+            descTitle: "生活習慣の違いや「お金・物質面での価値観のズレ」を時間をかけてすり合わせる関係",
+            subTitle: "一度築いた生活基盤やルーティンを頑なに守り抜き、何十年経っても揺るがない安心感",
+            theme: "変化を嫌う頑固さがお互いにあるからこそ、一度「この人とやっていく」と決めたら、どんな経済的な荒波が来ても絶対に手離さず、どっしり支え合う最も堅実な晩年を築ける関係。"
+        },
+        "双子座": {
+            descTitle: "「口だけになっていないか」「約束や言葉に責任を持っているか」をお互いに律し合う関係",
+            subTitle: "移り気になりがちな関係性の中に、知的な規律とちゃんとした対話のルールを築く試練",
+            theme: "軽いノリだけでは続かない現実の壁に直面した時、「ちゃんと話し合って決める」という知的な成熟を経ることで、何歳になっても新鮮さと確かな信頼を両立できる関係。"
+        },
+        "蟹座": {
+            descTitle: "身内びいきや感情の防衛本能が強くなりすぎるプレッシャーを、広い心で優しく解きほぐす関係",
+            subTitle: "家族としての責任や義務感に縛られすぎず、お互いの心を守り抜く強くて温かい絆",
+            theme: "「こうでああるべき家族像」や過去のトラウマに囚われやすい試練を乗り越え、長い年月をかけて本当の意味で「世界で一番安心できる血の通ったお城」を二人で完成させる関係。"
+        },
+        "獅子座": {
+            descTitle: "お互いのプライドや「認められたい欲求」がぶつかった時、謙虚に歩み寄る大人の成熟",
+            subTitle: "ただ派手に目立ちたいだけでなく、長い人生の責任を二人で誇らしく全うしていく絆",
+            theme: "若い頃の派手な自己主張や見栄を卒業し、「この人の前ではカッコつけなくていい」と互いの不器用さや老いも含めて、堂々と誇り合える唯一無二の存在になる関係。"
+        },
+        "乙女座": {
+            descTitle: "完璧を求めすぎてお互いを細かくチェックしすぎたり、重箱の隅をつつく緊張感を緩める試練",
+            subTitle: "日々の細やかな健康管理や実務の役割分担を、時間をかけて無理のない形に最適化する絆",
+            theme: "厳しすぎるルールで自分たちを縛るのではなく、「お互いに完璧じゃなくていいよね」と許し合いながら、歳を重ねるごとに暮らしの質と信頼がピカピカに磨かれていく関係。"
+        },
+        "天秤座": {
+            descTitle: "世間体や「こうあるべき美しいパートナーシップ」の型に自分たちを無理やりハメてしまう試練",
+            subTitle: "形式だけでなく、お互いの依存や遠慮を乗り越えて「本音で支え合う対等な契約」を結ぶ絆",
+            theme: "他人の目を気にしすぎて疲れてしまう課題をクリアし、表面的なスマートさの裏側にある「泥臭い現実の助け合い」を真正面から引き受けられる、真にエレガントで強い絆。"
+        },
+        "蠍座": {
+            descTitle: "「絶対に裏切られたくない」「相手のすべてをコントロールしたい」という強すぎる執着を手放す試練",
+            subTitle: "お互いのプライベートな深部や重たい課題を逃げずに背負い合い、生死を共にするような究極の絆",
+            theme: "深い猜疑心や過去の傷を時間をかけて溶かし合い、すべての秘密や弱さを共有した上で、「もうこの人なしでは生きられない」という圧倒的で不可分の絆に到達する関係。"
+        },
+        "射手座": {
+            descTitle: "「どこか遠くへ行きたい自由さ」と「一つの場所で家庭や責任を守る義務」のバランスを取る試練",
+            subTitle: "理想が高すぎて現実のパートナーに幻滅する壁を越え、共に人生の哲学を体現していく絆",
+            theme: "若い頃の刹那的な冒険心や無責任さを経て、「この人と共に生きること自体が、私たちの壮大な旅なんだ」と腹を括ったとき、最強の人生の同志・旅の伴侶となる関係。"
+        },
+        "山羊座": {
+            descTitle: "仕事や社会的責任、プレッシャーに押しつぶされそうな時、お互いを一番のセーフティネットにする試練",
+            subTitle: "恋愛のドキドキを越えて、人生の荒波を生き抜くための「絶対的な人生の経営基盤」を構築する絆",
+            theme: "土星が本拠地（ホーム）にいる最強の組み合わせ。どんなに世の中が変わろうとも、社会的信用やライフプランを共にガッチリ守り抜き、老後まで絶対安心の強固な城を築ける関係。"
+        },
+        "水瓶座": {
+            descTitle: "「自由でいたい個人」と「長く関係を続けるための社会的ルール」の折り合いをつける試練",
+            subTitle: "冷淡でドライになりすぎず、お互いの独自の個性を守りながら未来へ向かうシステムを作る絆",
+            theme: "古い結婚制度や世間の常識に縛られず、「自分たちにとって最も風通しが良くて持続可能なパートナーシップの形」を、長い時間をかけて実験・確立していく未来型の強い絆。"
+        },
+        "魚座": {
+            descTitle: "現実の厳しさや社会のルールから逃避したくなる甘えを、しっかりとした境界線で支え合う試練",
+            subTitle: "お互いの優しさやナイーブさを守るため、現実世界を生き抜くための防壁を二人で作り上げる絆",
+            theme: "曖昧模糊として形にしづかった境界線を、土星の力でしっかり引き直すことで、お互いの夢やスピリチュアルな感性を現実社会の中で安全に守り、慈しみ合える晩年の深い救いとなる関係。"
+        }
+    
+
+                }
+            }
+        };
+
+        // Progress Planet Metadata Definitions
+        const PROGRESS_PLANET_METADATA = {
+            Sun: {
+                icon: 'fa-sun text-amber-400',
+                title: 'P太陽（人生のメインテーマ・目指す方向性）',
+                desc: function(signName) {
+                    return `あなたの人生の意識や目指すべき生き方の軸が「${signName}」のテーマへ進化中。自分らしい主体性を高める時期です。`;
+                }
+            },
+            Moon: {
+                icon: 'fa-moon text-indigo-300',
+                title: 'P月（心のモード・感情のテーマ・引き寄せ期）',
+                desc: function(signName) {
+                    return `約2.5年ごとに変わる内面の気分は現在「${signName}」モード。どのような関わりや環境で安心感・愛を感じやすいかを示します。`;
+                }
+            },
+            Mercury: {
+                icon: 'fa-comments text-cyan-300',
+                title: 'P水星（興味関心・思考パターン・言葉の表現）',
+                desc: function(signName) {
+                    return `あなたの知的な好奇心やコミュニケーションの取り方が「${signName}」のカラーに更新中。言葉選びの変化が訪れます。`;
+                }
+            },
+            Venus: {
+                icon: 'fa-heart text-pink-400',
+                title: 'P金星（恋愛観のアップデート・魅力の開花）',
+                desc: function(signName) {
+                    return `あなたの愛の魅力とワクワク感が「${signName}」のカラーで発揮される時期。あなたらしい魅力を解き放つことで、運命の引き寄せ力が最大化します。`;
+                }
+            }
+        };
+
+        // Sabian Symbol sample keywords and themes by Zodiac Sign
+        // 各星座1〜30度のサビアンシンボル詳細データ（提供データおよび完全データ）
+        const SABIAN_DATA = {
+            "牡羊座": [
+                { t: "女性が水から上がり、アザラシも上がり彼女を抱く", m: "新しい環境や未知の分野に一歩踏み出し、自分の中に眠っていた新鮮な衝動やアイデアが芽生える時。直感に従って即行動を起こしたくなるような始まりの瞬間。" },
+                { t: "グループを楽しませているコメディアン", m: "周りの様子を冷静に観察しながら、その場の空気を和ませたり場を盛り上げたりする時。感情に流されず客観的な視点でコミュニケーションを楽しむ場面。" },
+                { t: "彼の祖国の形をした男の横顔の浮き彫り", m: "自分が育ってきた環境や所属する組織のルーツを強く意識する時。自分の運命や課せられた役割を受け入れ、責任感を持って物事に向き合う場面。" },
+                { t: "隔離された歩道を歩く二人の恋人", m: "周囲の喧騒から離れて、信頼できる大切な人と密に過ごす時。自分たちだけの秘密の空間や、他人に踏み込ませない個人的な世界を大切にする場面。" },
+                { t: "羽のある三角", m: "現実的な制限を吹き飛ばすような、高い理想やひらめきに心が躍る時。もっと上を目指したいという純粋な向上心から、枠にとらわれない発想が生まれる場面。" },
+                { t: "一辺が明るく照らされた四角", m: "勢いだけで進むのをやめて、まずは自分の足元や基盤をしっかり固めようとする時。ルールや計画を明確にして、安全な土台作りに専念する場面。" },
+                { t: "２つの領域でうまく自己表現している男", m: "本業と副業、仕事とプライベートなど、二つの異なる役割を器用にこなす時。状況に合わせて柔軟にスタンスを変え、どちらの場でも自分らしさを発揮する場面。" },
+                { t: "東に向いてなびいているリボンをつけた大きな帽子", m: "これから起こる変化や新しいトレンドを直感的に察知する時。時代の風向きを感じ取り、ワクワクする気持ちで先の予定や計画を立てる場面。" },
+                { t: "水晶を凝視する人", m: "目先の出来事に惑わされず、物事の全体像や本質をじっくり見極めようとする時。集中力を高めて、隠された原因や未来の可能性を深く洞察する場面。" },
+                { t: "古い象徴に対して新しい形を教える男", m: "これまでのやり方や古い慣習に対して「もっと良い方法がある」と新しい提案をする時。時代の変化に合わせて、伝統に新しい命を吹き込む場面。" },
+                { t: "国の支配者", m: "自分の意志や目指す方向性をブレずに貫き、チームやグループを引っ張っていく時。責任感を持って決断を下し、強いリーダーシップを発揮する場面。" },
+                { t: "野生の鴨の群れ", m: "仲間と同じ目的や目標に向かって、足並みをそろえて行動する時。個人の主張よりも集団のチームワークや流れに乗ることを優先する場面。" },
+                { t: "成功しなかった爆弾の爆破", m: "溜め込んでいた感情ややる気が空回りしたり、予想外の形で拍子抜けに終わる時。肩の力を抜いて、自分のエネルギーの出し方を見直す場面。" },
+                { t: "男と女のそばでとぐろを巻く蛇", m: "自分の中にある強い欲望や本能的なエネルギーが目覚める時。危機管理能力を高め、生命力や集中力をフルに使って物事に取り組む場面。" },
+                { t: "毛布を編むインディアン", m: "自分の身の回りにあるものを使って、こつこつと生活や環境を整える時。外部に頼らず自給自足の精神で、快適な居場所を手作りする場面。" },
+                { t: "日の入りに踊っている妖精ブラウニー", m: "忙しい日常の手を止めて、見えない支えや小さな幸運に感謝しながら羽を伸ばす時。フッと心が軽くなり、無邪気にリフレッシュを楽しむ場面。" },
+                { t: "２人のしかめつらした独身女性", m: "曖昧な妥協を許さず、物事の筋を通そうと厳しくチェックする時。自分自身のこだわりや純粋な基準を守るために、敢えてノーと言える場面。" },
+                { t: "空のハンモック", m: "やるべきことを全て脇に置いて、心身ともに完全な休息を取る時。情報や他人の意見を遮断して、しっかりエネルギーを充電する場面。" },
+                { t: "魔法のじゅうたん", m: "現実の細かい悩みから解放されて、自由な発想や思い切ったアイデアを膨らませる時。旅に出たくなったり、想像力を広げて新しい計画を思い描く場面。" },
+                { t: "冬に鳥に餌をやる若い少女", m: "困っている人や立場が弱い人に対して、さりげない思いやりや手助けをする時。厳しい状況の中でも心温まる優しさを差し伸べる場面。" },
+                { t: "リングに上がる拳闘士", m: "自分の実力を試すために、ライバルとの勝負や高いハードルに挑む時。恐怖心を乗り越えて「やるしかない」と覚悟を決めて打って出る場面。" },
+                { t: "欲望の庭に続く門", m: "楽しそうなことや魅力的な誘惑を前にして、飛び込んでみたい気持ちが高まる時。自分の感情や好奇心を抑え込まず、素直に解き放つ場面。" },
+                { t: "重く価値があるがベールに隠された荷を運ぶパステルカラーの服を着た女", m: "自分の本当の実力や大切な思いを、まだ周囲には明かさず大切に温めている時。柔らかい物腰の裏で、着実に将来のための準備を進める場面。" },
+                { t: "開いた窓と豊穣の角の形に吹き上げられたカーテン", m: "心をオープンにして新しいチャンスや好意を快く受け入れる時。思いがけないところから幸運や嬉しいお知らせが舞い込んでくる場面。" },
+                { t: "二重の約束", m: "理想と現実、仕事とプライベートなど、２つの異なる約束や可能性を同時に成り立たせようとする時。器用に立ち回り、どちらの価値も尊重する場面。" },
+                { t: "持ちきれないほどの贈り物を所有する男", m: "自分の中に眠るたくさんの才能や恵まれた環境に気づく時。自分ができることの多さに驚きつつ、それをどう活かすかワクワク考える場面。" },
+                { t: "想像の中で復活された失われた機会", m: "過去の失敗や諦めた夢をもう一度見直し、「今ならできるかも」と再挑戦の意欲を燃やす時。経験を活かしてリベンジを誓う場面。" },
+                { t: "落胆させられた大聴衆", m: "期待していた計画が予想外の展開になり、一度冷静になって現実に目を向ける時。集団の空気感に飲まれず、自分の頭で物事を捉え直す場面。" },
+                { t: "天球の合唱隊が歌っている", m: "周囲の環境や人間関係と見事な調和を感じ、深い感動や安心感に包まれる時。自分の進んでいる道が間違っていないと直感的に確信する場面。" },
+                { t: "アヒルの池とその雛", m: "自分が守られている安全なコミュニティや家庭の中で、落ち着いた時間を過ごす時。身近な範囲に線を引き、その中で大切なものを育む場面。" }
+            ],
+            "牡牛座": [
+                { t: "清らかな山の小川", m: "誰の意見にも染まっていない、自分自身の素直な感情や欲求をそのまま表現する時。新鮮でピュアな気持ちで、やりたいことに素直に向き合う場面。" },
+                { t: "電気的な嵐", m: "突然のトラブルや刺激的な出来事によって、ハッと目が覚めるような体験をする時。急な環境の変化によって、自分の本当の感覚や本心が引き出される場面。" },
+                { t: "クローバーが咲いている芝地に足を踏み入れる", m: "心地よい場所や安心できる人間関係の中で、心からリラックスする時。五感を使って美味しいものや綺麗なものを楽しむ場面。" },
+                { t: "虹のたもとの金の壷", m: "これまで地道に取り組んできたことが実を結び、確かな成果や豊かな報酬を手にする時。自分の努力が報われたことを実感して心満たされる場面。" },
+                { t: "開いた墓の前にいる未亡人", m: "過去の執着や終わった出来事にキッパリ区切りをつけ、前を向く時。古い価値観を手放すことで、新しい人生をスタートさせる場面。" },
+                { t: "渓谷にかけられる建設中の橋", m: "意見が食い違う人との間や、難しい問題同士をつなぐために努力する時。根気強くコミュニケーションを重ねて、協力関係を築く場面。" },
+                { t: "サマリアの女", m: "立場や背景が違う相手に対しても、偏見を持たずに温かく接する時。相手の本質を見て、心を通わせる場面。" },
+                { t: "雪がまだ降っていない時期のソリ", m: "これから訪れる季節や変化を見越して、早め早めに準備を整える時。周りが気づく前に未来への先手を打っておく場面。" },
+                { t: "飾られたクリスマスツリー", m: "家族や仲間と一緒に、豊かな成果や楽しい時間を分かち合う時。自分たちが積み上げてきた成果をアピールし、祝福する場面。" },
+                { t: "赤十字の看護婦", m: "困っている人や傷ついた人のために、自分の持っている能力や時間を惜しみなく差し出す時。親身になってサポートし、相手を安心させる場面。" },
+                { t: "花に水をやる女", m: "身近な植物や大切にしたいプロジェクトに、毎日コツコツ愛情を注いで育てる時。時間をかけて成果を待つ、丁寧な手入れの場面。" },
+                { t: "ウインドウショッピングをする人々", m: "自分が本当に欲しいものは何か、いろいろな選択肢を見比べながら楽しく吟味する時。理想の生活や憧れを具体的にイメージする場面。" },
+                { t: "荷物を運ぶ男", m: "多少の重圧や大変なタスクがあっても、ぐっとこらえて最後までやり遂げる時。粘り強さと責任感を持って地道に運搬する場面。" },
+                { t: "模索している貝と遊んでいる子供たち", m: "危険のない安全な環境で、好奇心のままに新しいことを探求してみる時。童心に帰って純粋な発見や学びを楽しむ場面。" },
+                { t: "マフラーと粋なシルクハットを身につけた男", m: "自分のファッションや振る舞いにこだわりを持ち、魅力的に自分を演出する時。社会的な場でも一目置かれる存在感を発揮する場面。" },
+                { t: "神秘を暴こうとする老人", m: "表面的な情報だけに満足せず、物事の裏にある仕組みや真理を徹底的に突き詰める時。探究心を燃やして知識を深く深掘りする場面。" },
+                { t: "剣とたいまつの間の戦い", m: "頭で考える理屈と、心から湧き上がる情熱の間で葛藤しながら最適な答を探す時。自分の意志を試されるような選択の場面。" },
+                { t: "バッグを窓から外へ出している女", m: "不要になった不要品や古い思い出の品を、一気に処分してすっきりさせる時。部屋や頭の中のスペースを空けて、新しい風を呼び込む場面。" },
+                { t: "新しく形成される大陸", m: "自分の中に新しいアイデアや才能の基盤がぐんぐんと出来上がっていく時。これまでにない全く新しいプロジェクトや挑戦の土台を築く場面。" },
+                { t: "雲を作り運び去る風", m: "滞っていた空気やモヤモヤした感情を、あっさりと吹き飛ばしてリフレッシュする時。過去に固執せず、流れに身をまかせて状況を変える場面。" },
+                { t: "開いた本を指す指", m: "困った時や迷った時に、確かなマニュアルや信頼できる教えに解決のヒントを見出す時。客観的なルールや真理に従って物事を進める場面。" },
+                { t: "荒れた水の上を飛ぶ白い鳩", m: "周りが混乱していたり過酷な状況であっても、心の中だけは穏やかさと希望を保ち続ける時。ぶれない信念で周囲に平和をもたらす場面。" },
+                { t: "宝石店", m: "自分が磨き上げてきた専門技術やセンスが集結し、高い評価を受ける時。自分の本質的な価値や才能を誇らしく思う場面。" },
+                { t: "馬にまたがり骸骨の締め具をつけたインディアン", m: "失敗を恐れず、自分の限界を超えるために強い覚悟を持って挑む時。自分の野性的な直感や根性を信じて突き進む場面。" },
+                { t: "大きく手入れの行き届いた公共の公園", m: "みんなが心地よく過ごせる環境を維持・管理し、平和なコミュニティを作る時。豊かさや快適な空間を大勢で分かち合う場面。" },
+                { t: "恋人にセレナーデを歌うスペイン人", m: "好きな人や情熱を注いでいる対象に向けて、自分の思いを素直に熱唱・アピールする時。ドラマチックに感情を表現する場面。" },
+                { t: "ビーズを売るインディアンの女", m: "自分の得意な手仕事やコツコツ作った成果物を、必要な人に届けて価値に変える時。自分の技術やセンスで堅実に貢献する場面。" },
+                { t: "成熟したロマンスに胸躍らせる女", m: "これまでの苦労や積み重ねが実を結び、満たされた幸せや成果を受け取る時。心から安らげる最高の結果に感謝する場面。" },
+                { t: "テーブルで働いている2人の靴職人", m: "気心の知れたパートナーと黙々と作業を分担し、質の高いものを作り上げる時。地道なチームワークで信頼関係を深める場面。" },
+                { t: "古代の芝地をパレードする孔雀", m: "自分の積み重ねてきた努力や実績を堂々と周囲にお披露目する時。伝統や自分のルーツに誇りを持ち、自信に満ちた姿を見せる場面。" }
+            ],
+            "双子座": [
+                { t: "静かな水に浮くガラス底ボート", m: "感情や集団の空気に巻き込まれず、客観的でクリアな視点で周囲の観察や情報収集をする場面。自分の心を落ち着かせつつ、物事の奥底をじっくり見極める時。" },
+                { t: "こっそりと靴下に物をつめるサンタクロース", m: "相手の好みや求めているものを察して、サプライズや裏方での気配りをする場面。自分の存在を主張せず、さりげなく喜ばれる心遣いを発揮する時。" },
+                { t: "チュイルリー庭園", m: "洗練された知識や美しい文化に触れ、知性を磨く場面。規律のある環境の中で、自分のセンスや思考をエレガントに磨き上げる時。" },
+                { t: "ヒイラギとヤドリギ", m: "季節のイベントやちょっとした習慣を楽しみ、生活に潤いやワクワク感を足す場面。身近なところから楽しみを見つけ出し、心をポジティブに保つ時。" },
+                { t: "過激な雑誌", m: "これまでの当たり前や常識を疑い、尖った主張や新しい切り口の情報に惹かれる場面。周囲をハッとさせるような刺激的な意見を発信する時。" },
+                { t: "油田の掘削", m: "自分の知識や人脈を深く掘り下げ、価値ある情報やビジネスのヒントを発掘する場面。根気強くリサーチを重ねて大きな成果を狙う時。" },
+                { t: "時代遅れの井戸", m: "流行に流されず、昔ながらの知恵や普遍的なノウハウを見直す場面。原点に返り、本当に役立つ基礎知識を大切にする時。" },
+                { t: "産業労働者のストライキ", m: "理不尽な状況に対して「ノー」と意思表示し、現状を打ち破ろうとする場面。周りと協力して権利や主張を通そうと立ち上がる時。" },
+                { t: "矢で満たされた矢筒", m: "目的に合わせていろいろなアイデアや手札を用意しておく場面。どんな質問や状況にも柔軟に対応できるよう、万全の準備を整える時。" },
+                { t: "落下する飛行機", m: "自信過剰になって広げすぎた計画を見直し、軌道修正を余儀なくされる場面。失敗から学び、思考をクールダウンさせる時。" },
+                { t: "体験に基づいた現実主義の新しい道", m: "理屈だけでなく、実際に自分で試して確かめた「実践的な方法」を選ぶ場面。リアルな体験を通して、自分に合ったスタイルを確立する時。" },
+                { t: "生意気に自己主張する少女トプシー", m: "空気を読みすぎず、素直な疑問や意見をストレートにぶつける場面。遠慮を捨てて、ありのままの自分らしさをアピールする時。" },
+                { t: "ピアノを目の前にした偉大な音楽家", m: "蓄積してきた知識やスキルを駆使して、高いパフォーマンスを発揮する場面。インスピレーションを形にし、自分の世界観を表現する時。" },
+                { t: "テレパシーでの会話", m: "言葉にしなくても、相手の意図や場の雰囲気が阿吽の呼吸で伝わる場面。直感的なひらめきや共感能力が高まる時。" },
+                { t: "会話をしている２人のオランダの子供", m: "共通の関心事を持つ人と、素朴で純粋な意見交換を楽しむ場面。難しい理論抜きで、気楽なおしゃべりから学びを得る時。" },
+                { t: "熱弁する婦人参政運動家", m: "自分の強い熱量や主張を、言葉の力を通して情熱的に伝える場面。相手の心を動かすために、熱く語りかける時。" },
+                { t: "知力の頭に溶けていった健康の頭", m: "頭の中で難しく考えすぎていたことを脱ぎ捨て、心身の健康やフィーリングを優先する場面。頭でっかちさを手放し、伸び伸び過ごす時。" },
+                { t: "中国語を話す２人の中国人", m: "専門用語や共通の趣味など、特定の理解者とだけ通じる密な会話を楽しむ場面。自分たちの世界に没頭して情報共有をする時。" },
+                { t: "大きな古典書物", m: "専門書や歴史的な知恵に学び、物事を根本から深く理解しようとする場面。信頼性の高い情報源をじっくり読み込む時。" },
+                { t: "カフェテリア", m: "たくさんの選択肢の中から、自分に必要な情報や好きなものを手軽にピックアップする場面。オープンな環境で多様な価値観に触れる時。" },
+                { t: "労働者のデモ", m: "自分の権利や主張を守るため、似た考えを持つ仲間と結束して行動を起こす場面。集団の力で状況を変えようとする時。" },
+                { t: "バーン・ダンス", m: "肩肘張らず、地域やコミュニティの集まりで楽しく親睦を深める場面。アットホームな雰囲気の中でリフレッシュする時。" },
+                { t: "木の高いところにある巣の中の３羽の雛", m: "安全な環境に守られながら、次のステップへ向けて成長や準備を進める場面。仲間と切磋琢磨しながら自分の力を蓄える時。" },
+                { t: "氷の上のスケート特技者", m: "困難な状況でも華麗にバランスを取り、高い技術や余裕をアピールする場面。自分のスキルを存分に見せつける時。" },
+                { t: "パームの枝を刈る男", m: "無駄な枝葉を切り落とし、必要なものだけに絞り込んで整理・清掃する場面。過剰な情報を整理してすっきりさせる時。" },
+                { t: "冬の日に霜で覆われた樹々", m: "余計な感情を削ぎ落とし、静寂の中で物事の真理や美しさをじっくり味わう場面。精神的に澄み切った境地に立ち、本質を見出す時。" },
+                { t: "森から出てくる森の精", m: "これまでの概念や限定された環境を抜け出し、新しい世界へと足を踏み入れる場面。枠にとらわれない自由な発想と感性を表現する時。" },
+                { t: "破産宣告された男", m: "過去の執着や不要になった人間関係・重荷を一気に脱ぎ捨てて身軽になる場面。ゼロリセットして新しいスタートを切る時。" },
+                { t: "第一のマネシツグミの歌", m: "時代の先触れや新しいトレンドの兆しをいち早く察知し、周囲に発信する場面。春の訪れを知らせるように、前向きなメッセージを伝える時。" },
+                { t: "海水浴をする人々", m: "個人的な思考の殻を破り、大勢の人と楽しさやオープンな解放感を分かち合う場面。社会全体や集団の大きな波に乗って自分を解放する時。" }
+            ],
+            "蟹座": [
+                { t: "船に掲示される巻かれ広げられる旗", m: "自分の属するグループやチームの掲げる理念にコミットし、団結力を高める場面。共通の目標に向かって気持ちを一つにする時。" },
+                { t: "広く平らな場所の上につるされた男", m: "個人的な感情や目先の損得を離れ、広い視野から客観的に全体を見渡す場面。一段高い視点から自分の立ち位置を捉え直す時。" },
+                { t: "毛皮に包まれた男と毛深い鹿", m: "過酷な環境や困難に対処するため、自分の本能的な鋭い直感や保護能力を頼りにする場面。生き抜くためのタフさを発揮して乗り切る時。" },
+                { t: "ネズミと議論する猫", m: "自分とは異なる価値観や相容れない相手に対しても、頭ごなしに否定せず対話や交渉を試みる場面。互いの妥協点を探る時。" },
+                { t: "列車に好戦的に向き合う汽車", m: "新しい技術や社会の波に対して恐れず果敢に挑む場面。自分たちの居場所や権利を守るために強い姿勢を見せる時。" },
+                { t: "巣を作る鳥", m: "安心して過ごせる居場所や生活の土台を自分の手で作り上げる場面。身近な家族や大切な仲間を温かく保護し育む時。" },
+                { t: "月明かりの夜のふたつの妖精", m: "現実の制限を超えて心と心が深く結びつく幻想的な体験をする場面。理屈を超えた直感的な共感や絆を感じる時。" },
+                { t: "服を着てパレードするうさぎ", m: "身近な仲間やグループのルールに沿って、楽しさを周囲と共有する場面。集団のスタイルに合わせて親しみやすさをアピールする時。" },
+                { t: "水から手を伸ばす小さな裸の少女", m: "助けを求める気持ちや素直な感情を隠さずアピールする場面。周囲の優しさやサポートを引き出し、心を通わせる時。" },
+                { t: "ダイヤモンドのカットを開始する未完成のダイヤモンド", m: "自分の中に眠る本質的な価値や才能を削り出し、磨き上げていく場面。地道な自己昇華と自己研鑽の時。" },
+                { t: "偉大なる啓示のイニシエーションの暗示", m: "集団や世界の深い真理に気づき、新しい意識へと目覚める場面。より広い使命感やビジョンを受け取る時。" },
+                { t: "メッセージを伝える中国人の赤ん坊", m: "まだ言葉にならない純粋な直感やインスピレーションを周囲に届ける場面。新しい可能性の芽を感じ取り共有する時。" },
+                { t: "サンダルを研究している一人の手", m: "自分の足元や行動の土台をじっくり観察し、改善する場面。日常生活や実践的な手段をコツコツ整える時。" },
+                { t: "北東の暗い空に向かう非常に年をとった男", m: "過去の経験から得た知恵や直感を信じて、未知の領域や未来へと向かう場面。静かな覚悟と精神的な深みを持つ時。" },
+                { t: "食事を楽しんでいる大勢の人々", m: "身近な仲間や家族と豊かさを分かち合い、温かい時間を過ごす場面。共通の体験を通じて連帯感を強める時。" },
+                { t: "手袋をしていない男", m: "自分の素顔や本音を包み隠さずオープンにし、誠実に向き合う場面。飾らない素の自分で他者と深くつながる時。" },
+                { t: "知識の多領域をアンロックする多重の才能の展開", m: "多彩なアイデアや可能性を一度に開花させる場面。自分の豊かな感受性と知識を多方面に活かす時。" },
+                { t: "ひよこのために土をほじる母鶏", m: "愛する家族や仲間のために惜しみなく労力を注ぎ、生活基盤を支える場面。献身的な愛情と面倒見のよさを発揮する時。" },
+                { t: "結婚式を執り行う司祭", m: "異なる要素や人々を結びつけ、公式な絆や契約を固める場面。責任を持って関係性を公にし、安定した土台を作る時。" },
+                { t: "歌っているゴンドラ乗り", m: "心地よい環境の中で自分の感情や喜びを伸び伸びと歌い上げる場面。周囲の雰囲気に寄り添いながら楽しさを共有する時。" },
+                { t: "プリマドンナの歌唱", m: "自分の感情や才能を堂々とドラマチックに表現する場面。集団の中心で人々の心を動かし、深い共感を呼ぶ時。" },
+                { t: "洋服を掛けたモデル", m: "自分の外見や魅力を周囲の期待に合わせて魅力的に演出する場面。場の求める雰囲気や役割をスマートにこなす時。" },
+                { t: "魅力的な文学的グループの会合", m: "知的で感受性の高い仲間と集まり、質の高い意見交換を楽しむ場面。感性を刺激し合い、心の満足を得る時。" },
+                { t: "南向きの太陽に照らされた島に住む男", m: "外部の喧騒から守られた豊かな環境で、安らぎと自給自足を楽しむ場面。プライベートな空間で心身を充足させる時。" },
+                { t: "リーダーの維持する指導力", m: "集団の団結や秩序を守るため、強い信念で導き続ける場面。信頼されるリーダーとして仲間を支え導く時。" },
+                { t: "豪華なサマーハウスでの読書", m: "快適で贅沢な環境でリラックスしながら知識や教養を深める場面。落ち着いた時間の中で豊かな感性を養う時。" },
+                { t: "激しい嵐のあとの渓谷", m: "激しい感情の動揺や変化を乗り越え、澄み切った穏やかさを取り戻す場面。過去の苦難を経て精神的に大きく成長する時。" },
+                { t: "現代の少女ポカホンタス", m: "異なる文化や新しい価値観を柔軟に受け入れ、架け橋となる場面。どんな環境でも自分の愛と信念を貫く時。" },
+                { t: "双子の重さを量る女神", m: "２つの選択肢や感情の間でバランスを取り、公正な判断を下す場面。客観的な視点で大切なものの価値を見極める時。" },
+                { t: "難破船から脱出した生存者", m: "困難や危機の渦中から無事に脱出し、新たな人生のスタートを切る場面。たくましい生存本能と再生の力を実感する時。" }
+            ],
+
+"獅子座": [
+                { t: "脳溢血の症例", m: "溢れ出る情熱や内なるエネルギーが一気に噴出する場面。抑えきれない衝動や強い意欲に従って、パワフルに行動を起こす時。"},
+ { t: "おたふく風邪の伝染", m: "自分の熱量やワクワクした気持ちが周りの人々に伝染していく場面。周囲を自分の世界観に巻き込み、影響力を高めていく時。"},
+ { t: "髪型をボブにした女", m: "過去のしがらみや古い自分を断ち切り、自分らしい新しい姿へイメチェンする場面。周囲の目を気にせず、自己表現を刷新する時。"},
+ { t: "正装した男と角を刈られた鹿", m: "野生的な衝動やわがままを控え、社会的なマナーや立場に合わせて自分をスマートに見せる場面。品格と節度を保つ時。"},
+ { t: "絶壁の端にある岩の塊", m:"周囲の環境に惑わされず、自分の存在感やブレない確信をアピールする場面。困難な状況でもどっしりと構えて誇り高く立つ時。"},
+ { t:  "時代遅れの女と最先端の少女", m: "伝統や積み重ねてきた実績と、新しいトレンドや斬新な感性を対比させる場面。新旧のギャップを実感しながら自分の立ち位置を選ぶ時。"},
+ { t:  "空の星座", m: "目先の出来事に振り回されず、大きな目標や理想のストーリーを描く場面。自分の人生のテーマや軸を客観的に見出す時。"},
+ { t: "ボルシェビキプロパガンダを広める人", m: "自分の強い信念や主張を熱弁し、周囲の考えを根底から塗り替えようとする場面。熱意をもって意見を力強く広める時。"},
+ { t:  "ガラス吹き", m: "自分の頭の中にあるイマジネーションや熱い想いを、時間をかけて美しい形へと練り上げる場面。集中してオリジナルの作品や企画を作り込む時。"},
+ { t: "早朝の露", m: "日常の忙しさの中で見落としがちな小さな美しさや一瞬の感動に気づく場面。純粋な感性が研ぎ澄まされ、心が清々しく満たされる時。"},
+ { t: "大きな樫の木の下にあるブランコに乗る子供たち", m: "信頼できる安心感の中で、純粋な遊び心や無邪気な冒険心を発揮する場面。安全な基盤の上で思い切り楽しむ時。"},
+ { t: "宵の芝パーティー", m: "自分と同じようなセンスやステータスを持つ人々と華やかな交流を楽しむ場面。特別な時間を優雅に共有し、満足感を得る時。"},
+ { t: "揺れている年をとった船長", m: "これまでの数々の経験や修羅場を糧にして、どっしりと余裕の態度を保つ場面。酸いも甘いもかみ分けた貫禄を発揮する時。"},
+ { t: "表現の機会を待つ人間の魂", m: "内に秘めた熱い才能ややりたいことを発揮できる「ここぞ」という出番をじっと窺う場面。準備を整えてスポットライトを待つ時。"},
+ { t: "山車", m: "自分の作った成果や魅力を周囲に大々的に披露し、祝福を受ける場面。自分の価値をオープンにして堂々とアピールする時。"},
+ { t: "嵐の後の陽光", m: "激しい葛藤や試練を乗り越えて、晴れやかな気持ちと圧倒的な解放感を味わう場面。トラブルが去って再び希望が見えてくる時。"},
+ { t: "ベストを着ていない聖歌隊", m: "形式的なルールやドレスコードにとらわれず、ありのままの情熱でみんなと気持ちを一つにする場面。飾らない素の自分たちで結束する時。"},
+ { t: "化学の先生" ,m: "自分の情熱やアイデアを客観的な法則・理論に落とし込んで人に教える場面。情熱と論理を掛け合わせて説得力を持たせる時。"},
+ { t: "ハウスボートパーティ" ,m: "日常生活のルールから少し離れて、非日常の空間でプライベートな仲間と盛り上がる場面。日常のストレスを忘れて羽を伸ばす時。"},
+ { t: "ズーニー族の太陽の崇拝者" ,m: "自分自身の内なる情熱や圧倒的なエネルギー源を敬い、心からエネルギーを充電する場面。自分の根幹にあるモチベーションを再確認する時。"},
+ { t:  "中毒したニワトリ" ,m: "自分の限界や周囲の影響を考えずに没頭しすぎた結果、一時的に混乱やふらつきを経験する場面。勢い任せの行動を見直す時。"},
+ { t: "伝書鳩" ,m: "離れた場所にいる人や大切な相手へ、確実に自分のメッセージや想いを届ける場面。目的を絞ってピンポイントでコミュニケーションをとる時。"},
+ { t: "裸馬乗り" ,m: "道具やマニュアルに頼らず、自分の身体感覚や直感だけで困難な状況を乗りこなす場面。度胸とセンスをフルに使って果敢に挑む時。"},
+ { t: "身だしなみの整っていない男" ,m: "他人の目や世間の評価を気にせず、自分の好きなことや内面の充実に没頭する場面。見た目の装飾よりも中身の情熱を優先する時。"},
+ { t: "砂漠を横切る大きなラクダ" ,m: "厳しい環境や長期戦であっても、蓄えたスタミナと強い意志で淡々と歩みを進める場面。目標に向かって根気強く耐え抜く時。"},
+{ t: "虹" ,m: "苦労や緊張が和らぎ、将来への明るい見通しや幸運の予兆を感じ取る場面。美しく希望に満ちたビジョンに心が躍る時。"},
+{ t: "夜明け" ,m: "長い暗闇や停滞期が終わり、新しいサイクルやプロジェクトが始まる期待感に包まれる場面。フレッシュな意欲が湧き上がってくる時。"},
+{ t: "大きな木の枝にとまるたくさんの小鳥" ,m: "同じ志や明るいエネルギーを持つ人々が集まり、賑やかに情報共有や会話を楽しむ場面。楽しいコミュニティの中でアイデアが膨らむ時。"},
+{ t: "人魚" ,m: "現実的な制約を超えて、ロマンや想像力あふれる世界に意識を向ける場面。自分の感受性や神秘的な直感を大切にする時。"},
+{ t: "封をされていない手紙" ,m: "自分の気持ちやアピールしたい内容を隠さず、オープンにして誰にでも見せられる状態にする場面。裏表のない態度で自分を表現する時。"}
+],
+
+ "乙女座": [
+ { t: "男の頭", m: "感情や雰囲気に流されず、純粋な観察眼と分析力で物事の本質を的確に捉える場面。クールで理性的な判断力を発揮する時。" },
+ { t: "掲げられた大きな白い十字架", m: "自分の欲望を脇に置き、自分の中の高い倫理観や使命感に従って行動する場面。公のために自分の力を役立てようとする時。" },
+ { t: "保護をもたらす人の天使", m: "見えない助けや周囲のあたたかいサポートを実感し、安心して自分のタスクに集中できる場面。守られている安心感の中で実力を発揮する時。" },
+ { t: "白人の子供たちと遊ぶ黒人の子", m: "生い立ちや価値観の違う相手とも偏見なくフラットに交流し、純粋な協力関係を築く場面。違いを超えて助け合う時。" },
+ { t: "妖精の夢を見る男", m: "細かい日常の作業をこなしつつも、心の中で豊かな想像力や理想のイメージを膨らませる場面。感性と現実のバランスをとる時。" },
+ { t: "メリーゴーラウンド", m: "決まったサイクルやルーティンワークを繰り返しつつ、その中で確実な安心感や楽しみを見出す場面。地道な反復学習や規則正しい生活を楽しむ時。" },
+ { t: "ハーレム", m: "自分の安全なテリトリーや管理下にある環境で、リラックスして過ごす場面。大切な人たちや好きなものに囲まれて心を充実させる時。" },
+ { t: "最初のダンスの練習", m: "新しい技術やスキルを身につけるため、基礎からコツコツと練習を重ねる場面。間違えながらも繰り返し体で覚えていく時。" },
+ { t: "未来派の絵を描く男", m: "既存の枠組みにとらわれず、自分なりの合理的なルールや先進的なデザインを組み立てる場面。独自の視点や効率化のアイデアを試す時。" },
+ { t: "影の向こうを覗くつの頭", m: "表面的に見えている情報だけでなく、その裏側にある真相や隠された意図を冷静に探る場面。多角的な視点で物事を深く調べる時。" },
+ { t: "母親の期待のとおりに成長する少年", m: "周りからの期待や社会的な要求に応えるため、素直に自分を磨き成果を出す場面。与えられた役割を完璧にこなそうとする時。" },
+ { t: "ベールをはずされた花嫁", m: "知りたいと思っていた真実や隠されていた全貌が隠すことなく目の前に現れる場面。幻想が消え、ありのままの現実に向き合う時。" },
+ { t: "政治運動を制圧する強い手", m: "混乱した状況や乱れたルールを、強い管理能力と統制力でビシッと立て直す場面。無駄や無秩序を徹底的に排除する時。" },
+ { t: "家系図", m: "これまでに培われてきた経験や伝統、実績のルーツを整理し、自分の強みを認識する場面。体系化された知識や歴史を活かす時。" },
+ { t: "装飾されたハンカチーフ", m: "細部まで行き届いた気配りや丁寧なマナーで、自分の品格や技術をアピールする場面。日常の小さな部分にこだわりを持って整える時。" },
+ { t: "オランウータン", m: "理屈や頭でっかちになりすぎた時、素朴な本能や身体の知恵に立ち返る場面。自分の原初的な感覚を大切にして自己管理する時。" },
+ { t: "噴火している火山", m: "内側に溜め込みすぎていた感情やプレッシャーが極限に達し、一気に爆発して浄化される場面。本音を吐き出して状況をリセットする時。" },
+ { t: "ウィジャボード", m: "目に見えないサインや微妙な感覚を敏感に察知し、判断の参考にする場面。潜在意識からのメッセージに耳を傾ける時。" },
+ { t: "水泳競争", m: "同じ目的を持つライバルたちと技やタイムを競い合い、お互いの実力を限界まで引き上げる場面。徹底的な実力主義で努力を重ねる時。" },
+ { t: "キャラバン車", m: "必要な道具や知識をコンパクトに積み込み、環境の変化に合わせて柔軟に場所ややり方を変える場面。機動力を活かしてテキパキ行動する時。" },
+ { t: "少女のバスケットボールチーム", m: "一人ひとりが自分の役割を完璧に果たし、チームプレーで高い目標を達成する場面。効率的な連携と相互サポートを発揮する時。" },
+ { t: "王家の紋章", m: "自分たちのグループや組織の誇り・ブランド価値を守り抜き、確固たる価値を示す場面。高品質なこだわりと実績を大切にする時。" },
+ { t: "アニマルトレーナー", m: "暴走しがちな感情や野心的な衝動を、コントロールと訓練によって上手に手懐ける場面。自己管理能力を極めてスキルを高める時。" },
+ { t: "メリーと彼女の白い羊", m: "純粋で無垢な思いを持ち続け、周囲にも温かい癒やしや安心感を与える場面。素直な優しさと誠実な態度で人と接する時。" },
+ { t: "半旗として掲げられた旗", m: "過去の失敗や区切りとなった出来事に対して、静かに敬意を表して気持ちを整える場面。喪失感を受け入れ、次の段階へ向けて心を静める時。" },
+ { t: "香炉を持つ少年", m: "清らかな心で日常のルーティンや奉仕作業に取り組み、自分の心を整える場面。誠実な態度で役割を全うし、場を浄化する時。" },
+ { t: "お茶会をしている高貴な貴婦人", m: "洗練されたマナーと心地よい会話で、品格のある時間を楽しむ場面。整った環境の中で上質なコミュニティを育む時。" },
+ { t: "スキンヘッドの男", m: "余計な装飾や見栄をすべて削ぎ落とし、究極のシンプルさと実用性を追求する場面。本質的な部分だけに集中してストイックに生きる時。" },
+ { t: "読んでいる書類から秘密の知識を得る男", m: "専門的な資料や細かいデータの中に隠された重要なヒントを見つけ出す場面。観察力を駆使して一歩先を行くノウハウを手にする時。" },
+ { t: "聞き取られなかった間違い電話", m: "意図せぬハプニングやちょっとした掛け違いによって、新しい視点や予期せぬ気づきを得る場面。偶発的な出来事すら冷静に楽しむ時。"}
+],
+
+ "天秤座": [
+ { t: "突き通す針により完璧にされた蝶", m: "客観的な視点や美意識を持ち、自分自身の姿や作品を最も魅力的な形で提示する場面。美しさや価値を静止画のように完成させる時。" },
+ { t: "六番目の部族の光が七番目のものに変質する", m: "人間関係や環境が変化し、新しいステージや人間関係のサイクルへと移行する場面。次のステップへと意識を切り替える時。" },
+ { t: "新しい日の夜明け、すべてが変わった", m: "古い人間関係や過去のわだかまりが消え、フレッシュな気持ちで新しい関係性をスタートさせる場面。心機一転して新しい未来を迎える時。" },
+ { t: "キャンプファイヤーを囲むグループ", m: "同じ志や価値観を持つ人々と温かく語り合い、親睦を深める場面。アットホームなコミュニティで絆と一体感を育む時。" },
+ { t: "心の内面の知恵を教える男", m: "自分の経験や知識を他人に分かち合い、アドバイスや学びを提供する場面。信頼できるメンターとして人と丁寧に向き合う時。" },
+ { t: "男の理想が多くの結晶に変わる", m: "自分の頭の中にあった理想やアイデアが、具体的な形や成果として現れる場面。周りの人との協働によって理想を現実化させる時。" },
+ { t: "ヒヨコに餌をやり、鷹から守る女", m: "大切な人間関係や守りたい環境を外敵やトラブルから注意深く保護する場面。細やかな気配りと強い愛着で安心な場を守る時。" },
+ { t: "荒廃した家の中で燃え盛る暖炉", m: "厳しい環境や過酷な状況の中でも、心の中の情熱や優しさを絶やさずに保つ場面。内面の温かさを糧にして困難を乗り切る時。" },
+ { t: "アートギャラリーに掛けられた人の巨匠", m: "歴史的な名作や一流のセンスに触れ、高い美意識や洗練された価値観を身につける場面。本物を見極める眼差しを養う時。" },
+ { t: "危険な流れを抜け安全な場所にたどり着いたカヌー", m: "対立や危険な交際・人間関係のトラブルをうまく回避し、安全な着地点に辿り着く場面。バランス感覚を発揮して危機を乗り切る時。" },
+ { t: "眼鏡ごしに覗き込んでいる教授", m: "感情に流されず、専門的なデータや客観的な視点で物事を分析・評価する場面。クールで論理的な判断を下す時。" },
+ { t: "鉱山から出てくる炭坑夫", m: "過酷な作業や地道な作業を終えて、現実社会や人間関係の場へ戻ってくる場面。積み重ねてきた努力の成果を持ち帰る時。" },
+ { t: "しゃぼん玉をふくらませている子供たち", m: "見栄えのする美しい夢や一時的なアイデアを楽しそうに広げる場面。結果に固執せず、アイデア出しや交流そのものを無邪気に楽しむ時。" },
+ { t: "正午の昼寝", m: "張り詰めた緊張感を緩め、心身ともに完璧な休息を取る場面。周囲との調和を保ちつつ、自分のペースを取り戻して充電する時。" },
+ { t: "環状の道", m: "同じパターンのやり取りや日常の循環の中で、安定感と調整力を身につける場面。ルーティンの中で洗練された無駄のない動きを維持する時。" },
+ { t: "流されてしまった船付き場", m: "これまでの依存関係や当たり前だった足場が去り、自立を余儀なくされる場面。人間関係の執着を手放し、新しい関係性を模索する時。" },
+ { t: "引退した船長", m: "第一線を退き、自分の豊富な経験や知恵を落ち着いて人に語り伝える場面。客観的な相談役やアドバイザーとして存在感を発揮する時。" },
+ { t: "逮捕された二人の男", m: "過去の取り決めや世間のルールに縛られ、自分の行動が制限される場面。社会的な約束事や人間関係の規律と向き合う時。" },
+ { t: "隠れている泥棒集団", m: "表立った行動を避け、信頼できる仲間と秘密の作戦や計画を練る場面。周囲に悟られないよう慎重に準備を進める時。" },
+ { t: "ユダヤ人のラビ", m: "受け継がれてきた伝統や精神的な教えに学び、人生の正しい指針を得る場面。確固たる哲学を持って周りを正しく導く時。" },
+ { t: "海岸の群衆", m: "たくさんの人々が集まるオープンな場で、多様な価値観や情報に触れる場面。広い社会とのつながりを楽しみながら客観性を磨く時。" },
+ { t: "噴水で鳥に水をやる子供", m: "純粋な好意や小さな親切を通して、身近な人や環境に潤いを与える場面。無返還の優しさで周囲との関係を温める時。" },
+ { t: "おんどり", m: "自分の意見や存在感をアピールし、周りの注意を惹きつける場面。先頭に立って新しい合図やメッセージを発信する時。" },
+ { t: "蝶の左側にある番目の羽", m: "人とは違う独自のセンスや感性を発揮し、個性を引き立てる場面。アンバランスさすらも魅力的な持ち味に変える時。" },
+ { t: "秋の葉の象徴が伝える情報", m: "季節の移り変わりや周囲の小さな変化から、大きな時代の兆候や潮目を読み取る場面。洗練された観察眼で先を見通す時。" },
+ { t: "互いに入れ替わる鷹と大きな白い鳩", m: "強い主張（攻撃性）と柔らかな歩み寄り（平和主義）を器用に使い分ける場面。相手に応じて柔軟に立ち振る舞いを変える時。" },
+ { t: "頭上を飛んでいる飛行機", m: "地上（現実）の細かい摩擦から離れ、高い視点から物事の全体像を俯瞰する場面。俯瞰的なアイデアで問題を一気に解決する時。" },
+ { t: "明るくなる影響の最中にいる男", m: "周りの優しさや洗練された雰囲気に触れて、自分の意識や振る舞いが磨かれていく場面。良い影響を受けて自己改革が進む時。" },
+ { t: "すべての知識に橋をかけようと模索する人類", m: "バラバラだった情報や異なる意見をつなぎ合わせ、大きな調和を図る場面。総合的な視野で誰もが納得する着地点を探す時。" },
+ { t: "哲学者の頭にある3つの知識のこぶ", m: "これまでに培った知恵や人間関係の経験を結集し、圧倒的な洞察力を手にする場面。洗練された知性の完成形を示す時。" }
+],
+
+ "蠍座": [
+　{ t: "観光バス", m: "仲間やグループと一緒に密な体験を共有し、絆を深めていく場面。深い人間関係や集団の渦に身を投じる時。" },
+ { t: "割れたビンとこぼれた香水", m: "抑え込んでいた感情や秘密が外にあふれ出し、周りに強い印象を残す場面。隠せない想いや魅力を強烈に放出する時。" },
+ { t: "棟上げ式", m: "大切な人や仲間と協力して、揺るぎない事業や関係の土台を作り上げる場面。共通の目標に向かって強固な絆を築く時。" },
+ { t: "火のともったろうそくを運ぶ若者", m: "自分の内に秘めた情熱や信念を静かに絶やさず、目標に向かって進む場面。純粋で強い意志を糧に暗闇を照らす時。" },
+ { t: "大きな岩場の海岸", m: "周囲からの強い圧力や試練に対しても、決して屈しないタフさを発揮する場面。強い忍耐力で自分自身の芯を守り抜く時。" },
+ { t: "ゴールドラッシュ", m: "欲しいものや価値ある成果を手に入れるため、なりふり構わず集中力を注ぎ込む場面。強い欲望を原動力にしてチャンスを掴む時。" },
+ { t: "深海潜水夫", m: "表面的な言葉に騙されず、物事の奥底や人の心の裏側を徹底的に探求する場面。ディープな真実や秘密を掘り下げる時。" },
+ { t: "湖面を横ぎって輝く月", m: "静かな環境の中で、自分の深い感情や直感的なインスピレーションと向き合う場面。心の奥底にある本当の想いに気づく時。" },
+ { t: "歯科の仕事", m: "不必要な問題や根本的な原因を、痛みを伴ってでも徹底的に治療・除去する場面。本質的な改善のために抜本的な改革を行う時。" },
+ { t: "親睦夕食会", m: "深い信頼関係にある人々と本音で語り合い、特別な一体感を味わう場面。密接なネットワークを通じて強力な結びつきを作る時。" },
+ { t: "救助される溺れた男", m: "自分一人の限界を認め、他人の助けやサポートを素直に受け入れる場面。絶体絶命のピンチから強力な救援を得る時。" },
+ { t: "大使館の舞踏会", m: "格式高いコミュニティや特別な社交の場で、持ち前の外交力と影響力を発揮する場面。人脈を広げて重要な繋がりを作る時。" },
+ { t: "実験をしている発明家", m: "自分のアイデアや可能性を信じて、密室で試行錯誤を繰り返す場面。執念と研究心で新しい価値を生み出す時。" },
+ { t: "仕事をしている電話接続士", m: "複雑な情報や人間関係を裏でつなぎ合わせ、ネットワークをコントロールする場面。重要なハブとして橋渡しをする時。" },
+ { t: "つの砂山のまわりで遊ぶ子供たち", m: "限られた資源や人間関係の中で、試行錯誤しながら新しい可能性を模索する場面。変化を楽しみながら自分の世界を作る時。" },
+ { t: "いきなり笑い出す少女の顔", m: "緊張感のある場面で急に肩の力が抜け、素の感情が溢れ出す場面。張り詰めた空気をフッと和ませて解放感を味わう時。" },
+ { t: "自分自身の子供の父である女", m: "外部の助けに頼らず、自分自身の内なる強さと発想力だけで新たな可能性を生み出す場面。圧倒的な自己完結力を発揮する時。" },
+ { t: "豪華な秋色の森", m: "これまで時間をかけて蓄積してきた才能や努力が成熟し、豊かな成果として花開く場面。実りの豊かさを実感し満たされる時。" },
+ { t: "聴いてはしゃべっているオウム", m: "影響力のある人物の教えや言葉を忠実に吸収し、それを自分の言葉で広める場面。徹底的なインプットとアウトプットを行う時。" },
+ { t: "つの暗いカーテンを横に引っ張っている女", m: "秘密のベールを脱ぎ捨て、隠されていた真実や未知の世界を白日の下に晒す場面。思い切って新しい扉を開く時。" },
+ { t: "職務放棄兵士", m: "組織のルールや義務感よりも、自分自身の本音や個人の意思を優先する場面。理不尽な拘束を拒否して自分の道を選ぶ時。" },
+ { t: "鴨に向かって進み出るハンター", m: "目標に対して狙いを定め、静かに、かつ確実にチャンスを捕らえに行く場面。鋭い集中力と観察眼で目的を果たす時。" },
+ { t: "妖精に変容するウサギ", m: "野性的な本能や日常の衝動が、より高い精神性や直感力へと進化する場面。自分のステージをガラリと変容させる時。" },
+ { t: "一人の男の話を聴くために山から降りてきた群集", m: "カリスマ的な人物の言葉や強い理念に導かれ、大勢の人が心を動かされる場面。強い想いで人々を惹きつける時。" },
+ { t: "Ｘ線", m: "表向きの繕いに誤魔化されず、裏にある本質や隠された原因を透視するように見抜く場面。見えない部分を正確に把握する時。" },
+ { t: "キャンプをつくっているインディアンたち", m: "どんな環境であっても、信頼できる仲間と団結して生き抜く基盤を作る場面。強い生存本能と共同体意識を発揮する時。" },
+ { t: "行進している軍楽隊", m: "自分の持つ情熱やメッセージを、力強いリズムとパフォーマンスで周囲にアピールする場面。集団のテンションを高める時。" },
+ { t: "自分の領土に近づく妖精たちの王", m: "目に見える現実だけでなく、直感やスピリチュアルな感覚を味方につけて自分の領域を広げる場面。自信に満ちた態度で自陣を守る時。" },
+ { t: "酋長に自分の子供たちの命ごいをするインディアンの女性", m: "切実な情熱や愛を持って、相手の情けや慈悲心に強く訴えかける場面。強い感情の力で相手の心を動かす時。" },
+ { t: "ハロウィンのわるふざけ", m: "抑圧された感情や溜まったストレスを、ユーモアやちょっとした悪ふざけで解き放つ場面。ルールを少し破ることで心を解放する時。"}
+],
+
+ "射手座": [
+ { t: "共和主義の威厳ある軍隊のキャンプファイヤー", m: "同じ高い志や目的を持つ仲間と集まり、未来のビジョンや理想について熱く語り合う場面。共通の目標に向かって団結力を高める時。" },
+ { t: "白い波帽子に覆われた大洋", m: "圧倒的な自然の力や時代の大きな変化に直面し、自分のスケールを押し広げようとする場面。ダイナミックな衝動に身を任せて挑戦する時。" },
+ { t: "チェスをする人の男", m: "先々の展開や相手の動きを冷静に予測しながら、戦略的な頭脳戦を楽しむ場面。知的な駆け引きを通して物事を有利に進める時。" },
+ { t: "歩くことを学んでいる小さな子供", m: "新しい分野や未体験の挑戦に対して、何度も転びながらも前向きに練習を重ねる場面。焦らず一歩ずつ経験を積んで成長する時。" },
+ { t: "木の高いところにいる老いたフクロウ", m: "目先の騒がしさに惑わされず、高みの視点から静かに全体を観察し、的確な判断を下す場面。深い知恵と洞察力を発揮する時。" },
+ { t: "クリケットゲーム", m: "集団のルールやスポーツマンシップを尊重しつつ、仲間と爽やかに競い合う場面。健全な競争の中でチームワークや社会的マナーを磨く時。" },
+ { t: "ドアをノックするキューピッド", m: "思いがけないところから愛やチャンス、ワクワクするお誘いが舞い込んでくる場面。素直に心をひらいて幸運を迎え入れる時。" },
+ { t: "内部で形成されている岩やその他のもの", m: "表からは見えないけれど、自分の中で新しい価値観や確固たる意志が静かに形成される場面。じっくり時間をかけて内面を熟成させる時。" },
+ { t: "階段で子供たちを連れている母親", m: "経験の浅い人や後輩を温かく見守りながら、一段ずつステップアップできるよう導く場面。愛情を持った教育やサポートに力を注ぐ時。" },
+ { t: "金髪の幸運の女神", m: "自分の直感や楽観的な思考に従って動くことで、絶妙なタイミングで幸運を引き寄せる場面。自分の引き寄せの強さを実感する時。" },
+ { t: "寺院の左側にある物質的悟りをもたらすランプ", m: "抽象的な理想だけでなく、現実の生活や仕事に直結する実用的な知恵を見出す場面。理想と現実を上手にリンクさせる時。" },
+ { t: "ときの声をあげる鷹に変化する旗", m: "単なるスローガンや理念だったものが、具体的な行動力や意志となって力強く動き出す場面。信念をエネルギーに変えて突き進む時。" },
+ { t: "明るみに出る未亡人の過去", m: "隠されていた真実や過去の経緯が白日の下に晒され、誤解が解けてすっきりする場面。ありのままの事実を受け入れて前進する時。" },
+ { t: "ピラミッドとスフィンクス", m: "人類の歴史や悠久の真理に思いを馳せ、普遍的な価値を探求する場面。圧倒的なスケールの知識や教養に触れる時。" },
+ { t: "自分の影を探すグラウンドホッグ", m: "自分の予測や直感が正しいかどうか、周囲の反応や状況を伺いながら慎重に確認する場面。先々の見通しを立てて判断する時。" },
+ { t: "船を見ているカモメ", m: "現場に直接飛び込まず、少し離れた安全な場所から全体の流れやチャンスを伺う場面。効率的な観察で一番良いタイミングを待つ時。" },
+ { t: "復活祭の日の出の礼拝", m: "過去の挫折や停滞を乗り越え、新しい希望や精神的な再生を感じる場面。清々しい気持ちで新たなサイクルを祝福する時。" },
+ { t: "日除け帽をかぶっている小さな子供たち", m: "強い刺激や過酷な環境から守られながら、安全に伸び伸びと自分の世界を楽しむ場面。無理のない環境で個性を育む時。" },
+ { t: "住処を移動するペリカン", m: "今の環境に満足せず、より豊かな資源や自分の可能性を広げられる場所へと引っ越す場面。環境の変化を恐れず挑戦する時。" },
+ { t: "氷を切り出す男たち", m: "過酷な状況や厳しい条件の中でも、持ち前のバイタリティで将来役立つ資源や成果を勝ち取る場面。タフな精神力と実利を追及する時。" },
+ { t: "借りた眼鏡をかけている子供と犬", m: "自分より経験豊かな人の視点や道具を借りて、物事を新しく捉え直してみる場面。型にとらわれない発想で理解を深める時。" },
+ { t: "中国のランドリー", m: "自分の馴染み深いコミュニティや文化を大切にし、その中で地道に誠実な仕事をこなす場面。独自のスタンスを守りながら信頼を得る時。" },
+ { t: "移民が入国する", m: "全く異なる新しい世界や慣習の中に勇気を出して飛び込んでいく場面。過去を脱ぎ捨て、新しい文化や価値観を受け入れる時。" },
+ { t: "家のドアにとまっている青い鳥", m: "遠くを探し回らなくても、自分のすぐ身近な生活の中に本当の幸せや好機があると気づく場面。日常の恵みに感謝する時。" },
+ { t: "玩具のウマに乗っている小太りの少年", m: "現実の厳しい制約にとらわれず、安全なプレイスペースでイマジネーションを伸び伸び遊ばせる場面。遊び心からアイデアを育てる時。" },
+ { t: "旗手", m: "自分の属する集団や信念のシンボルを誇らしく掲げ、みんなの先頭に立つ場面。強い責任感で周囲の士気を高める時。" },
+ { t: "彫刻家", m: "自分の頭の中にある漠然としたイメージを、削り出し磨き上げることで具体的な作品にする場面。強い集中力で妥協のない形を作り出す時。" },
+ { t: "美しい流れにかけられた古い橋", m: "世代や考え方の異なる人々をつなぎ、長年の伝統と新しい流れをうまく架け橋する場面。歴史や実績の確かさを活かす時。" },
+ { t: "芝を刈る太った少年", m: "自分のテリトリーや身の回りを綺麗に手入れし、快適な状態に維持する場面。地道な作業を通して自分の役割をしっかり果たす時。" },
+ { t: "法王", m: "多くの人々に開かれた精神的な指針や高い価値観を示し、信頼を集める場面。高い見識をもって社会的なリーダーシップを発揮する時。" }
+],
+
+ "山羊座": [
+ { t: "認識を求めるインディアンの酋長", m: "自分の実績や集団の代表としての立場を社会にしっかり認めさせようとする場面。自分の存在価値や権威を堂々と主張する時。" },
+ { t: "3つのステンドグラスの窓、一つは爆撃で損傷している", m: "理想的な状態や集団の中で一部の欠陥や傷に気づき、それを冷静に補修しようとする場面。不完全さを認めて現実的に対処する時。" },
+ { t: "成長と理解に対して受容的な人間の魂", m: "自分のエゴを抑え、より大きな教えや社会の要請を素直に受け入れて成長する場面。オープンな心で知識や導きを吸収する時。" },
+ { t: "大きなカヌーへ乗り込む一団", m: "共通の目的のために、信頼できる仲間と組織を結成して乗り出す場面。集団のチームワークで大きな目標へ挑む時。" },
+ { t: "カヌーを漕ぎ戦争の踊りを踊っているインディアン", m: "目標達成や勝負に向けて、チーム全員の士気を極限まで高めて一致団結する場面。集団のエネルギーを結集して挑む時。" },
+ { t: "暗いアーチのある小道と底にひかれた本の丸太", m: "厳しい障害や困難なプロセスを、論理的な手順と地道な努力で乗り越えていく場面。着実な一歩を重ねて目的地へ進む時。" },
+ { t: "力のあるベールに隠れた予言者", m: "自分の手の内や本質を安易に見せず、裏で着実に計画や戦略を温める場面。ミステリアスな存在感で強い影響力を持つ時。" },
+ { t: "しあわせそうに歌う家の中の鳥", m: "限られた環境や決められたルールの中でも、自分の与えられた場所で幸せと満足を見出す場面。現状をポジティブに活かす時。" },
+ { t: "ハープを運ぶ天使", m: "ピリピリとした社会や張り詰めた場に、調和と優しさをもたらす役割を果たす場面。高い倫理観と美意識で周囲を癒やす時。" },
+ { t: "手から餌をもらうアホウドリ", m: "本来なら遠い存在である相手とも、誠実さと信頼を積み重ねることで深い協調関係を結ぶ場面。自然体で懐に飛び込む時。" },
+ { t: "キジの大きな群れ", m: "洗練された高い社会的ステータスや、限られた特別なコミュニティに属する場面。恵まれた環境の中で自分の価値を高める時。" },
+ { t: "講義をする自然の学徒", m: "客観的な事実や自然界の法則を観察し、そこから得た確かな知恵を人々にわかりやすく解説する場面。論理的で説得力のある知性を示す時。" },
+ { t: "火の崇拝者", m: "目に見える成果や事業の裏にある「熱い理念や原動力」を徹底的に追求する場面。確固たる志を持って物事に没頭する時。" },
+ { t: "花崗岩に刻まれた古代の浮き彫り", m: "一瞬の流行に惑わされず、時代を超えて残る永続的な成果や作品を残そうとする場面。不動の信念と確かな足跡を刻む時。" },
+ { t: "病院の子供病棟にあるたくさんのおもちゃ", m: "社会的・立場的に弱い存在に対して、物質的・精神的なサポートを手厚く提供する場面。責任感を持った社会的な奉仕を発揮する時。" },
+ { t: "体操着の少年少女", m: "集団の規律に合わせて自分の身体やスキルを鍛え上げ、健康的な土台を作る場面。ルールに従って自己管理を行う時。" },
+ { t: "密かに裸で入浴する少女", m: "社会的な肩書や責任を一時的に脱ぎ捨て、プライベートな空間で素の自分に戻る場面。集団のプレッシャーから離れてリフレッシュする時。" },
+ { t: "イギリスの国旗", m: "伝統ある組織や国の威信、誇りを一身に背負って責任を果たす場面。確固たるアイデンティティと社会的信頼を体現する時。" },
+ { t: "大きな買い物袋を下げた歳程度の子供", m: "自分の実力以上の重責や高いタスクを与えられながらも、一生懸命やり遂げようとする場面。背伸びをして責任感を養う時。" },
+ { t: "歌っている隠れた合唱隊", m: "表舞台で目立つことよりも、裏方から全体の一体感やクオリティを支える場面。陰の力として調和を作り出す時。" },
+ { t: "リレー競走", m: "自分の役割を果たしたら次の人へとスムーズにバトンを渡し、目標を達成する場面。組織的な連携とチームプレイで成果を出す時。" },
+ { t: "敗北を優美に認める将軍", m: "勝敗や自分のこだわりを超えて、引き際や失敗を潔く受け入れる品格を示す場面。状況を客観的に受け入れて成熟した対応をとる時。" },
+ { t: "戦争での勇敢さをたたえる2つの賞", m: "これまでの努力や社会的な貢献が公に認められ、素晴らしい評価や勲章を受ける場面。実力と功績を証明する時。" },
+{ t: "修道院に入る女", m: "異文化を取り入れ、自分の属する集団にない異種の文化を取り入れ、自分のものとして活用する場面。" },
+ { t: "東洋の布を扱う商人", m: "異文化の希少な価値や珍しい商品を自分の社会に持ち込み、新しいビジネスや価値を生み出す場面。豊かな資源を賢く流通させる時。" },
+ { t: "水の妖精", m: "堅苦しい社会のルールから離れ、自分の純粋な感情や直感に従って自由に表現する場面。固まった心をしなやかに解きほぐす時。" },
+ { t: "山の巡礼", m: "困難な道であっても、高い目標や精神的な高みを目指して黙々と登り続ける場面。強い意志を持って修行や努力を継続する時。" },
+ { t: "大きな養鶏場", m: "システムや管理体制を徹底的に効率化し、安定した生産や成果を大規模に生み出す場面。組織的で隙のない運用を行う時。" },
+ { t: "お茶の葉を読んでいる女", m: "日常のわずかな兆候や直感を読み解き、先々の状況や人の心の動きを察知する場面。経験に裏打ちされた鋭い予知能力を使う時。" },
+ { t: "秘密のビジネス会議", m: "世間の目から離れた重要な意思決定の場で、実力者同士が真の権力や戦略を動かす場面。核心的な意思決定を下す時。"}
+
+],
+
+ "水瓶座": [
+ { t: "古いレンガ造りの伝道所", m: "理想や信念を長年にわたって大切にし、地域や社会の中で静かに人々の支えとなる場面。普遍的な志をブレずに持ち続ける時。" },
+ { t: "予期されなかった雷雨", m: "急な展開やハプニングによって、従来の決めつけや固定概念が一気に覆される場面。停滞した空気を一新するイノベーションの時。" },
+ { t: "海軍からの脱走兵", m: "組織や集団の理不尽な拘束を拒否し、個人の自由や独立を最優先する場面。周りに流されず自分の信念を貫いて自立する時。" },
+ { t: "インドのヒーラー", m: "伝統的な知恵や目に見えないエネルギーを活かして、人々の心身を根本から癒やす場面。個人の持つ特別な能力や技術で貢献する時。" },
+ { t: "先祖の委員会", m: "自分たちの持つルーツや過去からの歴史的インスピレーションを受け取り、未来の判断材料にする場面。客観的な知恵を結集させて道を選ぶ時。" },
+ { t: "ミステリー劇の演技者", m: "客観的な視点を保ちながら、自分の与えられた役柄やシチュエーションを完璧に演じ分ける場面。感情に流されず役割をスマートにこなす時。" },
+ { t: "卵から生まれた子供", m: "既存の枠組みや血縁関係に縛られず、新しい時代や全く新しい価値観のもとで生まれる場面。独創的でピュアな個性を打ち出す時。" },
+ { t: "美しい衣装を着た蝋人形", m: "客観的に見て完璧で美しいスタイルや理想像を提示する場面。感情を交えず、デザインや美意識をクールに表現する時。" },
+ { t: "鷹に変化する旗", m: "抽象的なアイデアや社会のビジョンが、具体的かつ力強い実行力に変わる場面。理想に向かって堂々と突き進む時。" },
+ { t: "一時的だと証明される人気", m: "一時の流行や評価に浮足立たず、冷めた客観性を持って見守る場面。表面的な賞賛に振り回されない真の実力を育む時。" },
+ { t: "自分のひらめきと向き合う男", m: "外部の騒がしさから距離を置き、自分の中に降りてきたユニークなアイデアをじっくり育てる場面。ひらめきを論理的に整理する時。" },
+ { t: "上へと順に並ぶ階段の上の人々", m: "能力や意識の段階に応じたフラットなネットワークの中で、互いに磨き合い高め合う場面。切磋琢磨してスキルを伸ばす時。" },
+ { t: "バロメーター", m: "時代の潮流や人の心、環境のわずかな変化を鋭く察知する場面。データや客観的サインをもとに先の動向を予測する時。" },
+ { t: "トンネルに入る列車", m: "目的地に向かって、途中の誘惑や雑音に脇目もふらず一直線に進む場面。ブレない集中力で目標にまい進する時。" },
+ { t: "フェンスの上にとまっている羽のラブバード", m: "立場や境界線を超えて、お互いに自立した対等で知的な人間関係を育む場面。心地よい距離感を保ちながら信頼を深める時。" },
+ { t: "机に座っている偉大なビジネスマン", m: "広範囲の情報や資源を客観的にコントロールし、社会的な影響力を発揮する場面。俯瞰的な経営センスや管理能力を発揮する時。" },
+ { t: "ガードをしている番犬", m: "自分たちのコミュニティや大切な理念を外敵や不正から断固として守り抜く場面。強い警戒心と高い防衛意識で場を守る時。" },
+ { t: "仮面がはがされた男", m: "表面的な繕いやウソが暴かれ、素のありのままの姿が露わになる場面。飾らない本質と直面し、嘘偽りのない関係を作る時。" },
+ { t: "消しとめられた山火事", m: "激しく暴走しかけた感情や予期せぬトラブルを、冷静沈着な対処で迅速に収める場面。沈着冷静なチームワークで危機を脱する時。" },
+ { t: "大きな白い鳩、メッセージの担い手", m: "高い視点から平和や希望のメッセージを受け取り、みんなに共有する場面。素晴らしい好機やインスピレーションを届ける時。" },
+ { t: "絶望し幻滅した女", m: "表面的な理想や淡い期待を手放し、厳しい現実を直視する場面。幻想から目覚めることで、真の自立へ踏み出す時。" },
+ { t: "子供たちが遊ぶために床にひかれた布", m: "誰もが安全にのびのびと個性を発揮できる自由な環境を用意する場面。みんなが過ごしやすい優しい土台を作る時。" },
+ { t: "座ってすべての手足を振っている大きな熊", m: "自分のポテンシャルや持っているパワーを、無邪気でユニークな方法で周りにアピールする場面。飾らない自分をオープンにする時。" },
+ { t: "情熱に背を向け自分の経験により教えている男", m: "個人的な感情や過去のエゴを卒業し、豊かな経験を客観的な知恵として人に語り継ぐ場面。指導者として人を正しく育てる時。" },
+ { t: "右の羽がより完全に形成されている蝶", m: "直感や理論を研ぎ澄まし、新しい時代のスタイルを先取りして形にする場面。高度に洗練された新しい個性を見せる時。" },
+ { t: "水圧計", m: "社会の感情的な高まりやプレッシャーの度合いを、客観的な数値や基準で捉える場面。状況の限界や安全性を冷静に見定める時。" },
+ { t: "スミレで満たされた古代の陶器", m: "伝統や歴史ある枠組みの中に、フレッシュで心温まる情感をそっと流し込む場面。温故知新のセンスで空間を彩る時。" },
+ { t: "倒されのこぎりで切られた木", m: "長年役に立ってきた古いシステムや慣習を整理し、次の利用のために再構築する場面。古い歴史を活かして効率化を図る時。" },
+ { t: "さなぎから出てくる蝶", m: "これまでの制限や閉じ込められた状態から抜け出し、全く新しい世界へ羽ばたく場面。劇的な脱皮と変容を遂げる時。" },
+ { t: "アーダスの咲いている野原", m: "個性が完全に開花し、誰もが自由に調和して存在する理想的な空間を共有する場面。究極の平和と自由を実感する時。" },
+],
+
+ "魚座": [
+ { t: "公共の市場", m: "多様な価値観や感情、人脈が入り乱れるオープンな場で交流を楽しむ場面。損得を超えてオープンな人と人のつながりを分かち合う時。" },
+ { t: "ハンターから隠れているリス", m: "周囲の強い圧迫や過酷な環境から離れ、自分の安全な場所で静かにエネルギーを守る場面。防衛本能でプライベートを守る時。" },
+ { t: "化石化された森", m: "過ぎ去った過去の思い出や歴史的感情を、大切な宝物として心の中に留める場面。普遍的な価値を静かに保存する時。" },
+ { t: "狭い半島での交通渋滞", m: "多様な感情や情報が一気に集まり、身動きが取れなくなるような混乱を経験する場面。焦らず整理整頓を待ってやり過ごす時。" },
+ { t: "教会のバザー", m: "誰かのため、社会のために自分の持ち物や愛情を惜しみなく分かち合う場面。奉仕の精神で温かい循環を作る時。" },
+ { t: "正装して行進している将校たち", m: "大きな目的や精神的なルールのために、規律正しく自分をコントロールする場面。集団の美しい秩序に合わせて行動する時。" },
+ { t: "岩の上に横たわっている十字架", m: "個人的な欲望を手放し、運命的な試練や高い精神的目標を受け入れる場面。強い信念をもって困難に耐え抜く時。" },
+ { t: "ラッパを吹く少女", m: "自分の内側から湧き上がる純粋な感情や喜びを、素直なサインとして周りに響かせる場面。新しい始まりを告げる時。" },
+ { t: "騎手", m: "自分の波立つ感情や本能的な衝動を、うまくコントロールして目的地へ向かう場面。感覚と情熱のバランスを保ち進む時。" },
+ { t: "雲の上の飛行家", m: "地上（日常）の細かい問題から完全に浮上し、高次元の視点から物事を眺める場面。現実を超越したインスピレーションを得る時。" },
+ { t: "光を探している男たち", m: "迷いや暗闇の中でも諦めず、真理や救い、明るい答えを求めて進む場面。純粋な探究心で希望の光を見出す時。" },
+ { t: "新参者たちの試験", m: "新しい世界やコミュニティに入るため、自分自身の誠実さや適性を試される場面。受け入れられるための試練をクリアする時。" },
+ { t: "博物館にある刀", m: "過去の激しい情熱や闘争心を、歴史的な知恵として静かに保存する場面。攻撃性を手放し、伝統の誇りとして受け継ぐ時。" },
+ { t: "キツネ皮をまとった女性", m: "自分の持ち味や魅力を効果的に使い、厳しい世の中を賢く生き抜く場面。持ち前の感覚やスマートな立ち回りを活かす時。" },
+ { t: "部下の訓練を準備している将校", m: "これから訪れる大きな波や試練に備え、仲間や自分自身のメンタルをしっかり整える場面。万全の準備と育成に力を注ぐ時。" },
+ { t: "ひらめきの流れ", m: "自分の内側や宇宙的な源泉からあふれ出る豊かなインスピレーションを受け取る場面。感情や無意識のグラデーションに浸る時。" },
+ { t: "復活祭の歩道", m: "多くの人たちと喜びや希望を分かち合い、華やかで晴れやかな雰囲気を味わう場面。祝福された空気の中で共感し合う時。" },
+ { t: "巨大なテント", m: "日常から離れた非日常の祝祭空間で、大勢の人々とダイナミックな感動を共にする場面。日常を超えたワクワク感を味わう時。" },
+ { t: "弟子を指導する巨匠", m: "世代を超えて技術や深い教えをマンツーマンで伝承していく場面。魂のこもった知識や秘伝の技術を引き継ぐ時。" },
+ { t: "夕食のために用意されたテーブル", m: "大切な人を温かく迎え入れ、豊かで心満たされるひとときを準備する場面。心のこもったもてなしで絆を深める時。" },
+ { t: "小さな白い羊と子供と中国人の召し使い", m: "文化や立場の違いを超えて、純粋な優しさと平和な環境の中で調和する場面。飾らない素朴な人間愛を感じる時。" },
+ { t: "シナイから新しい法則を持ち降りてくる男", m: "人々の混乱を収めるため、新しい絶対的な規範やルールを持ち帰る場面。精神的な正しさを力強く示す時。" },
+ { t: "精神主義的な現象", m: "目に見える物質世界を超えて、心や霊的なサイン、目に見えない繋がりを実感する場面。不思議な縁やシンクロニシティを感じる時。" },
+ { t: "人の住んでいる島", m: "過酷な外界から守られた独自の環境で、自分たちだけの豊かな世界を築く場面。安心できる独自のペースを大切にする時。" },
+ { t: "聖職の浄化", m: "自分の中の邪心やエゴをきれいに洗い流し、清らかな原点へと立ち返る場面。自己反省を通して純粋性を取り戻す時。" },
+ { t: "影響を分割する新月", m: "新しいサイクルの始まりにあたり、今後の方向性や可能性を静かに選択・切り分ける場面。新しい直感にしたがって種をまく時。" },
+ { t: "収穫の月", m: "これまでの長いプロセスや積み重ねが完璧に熟し、豊かな成果を受け取る場面。大きな感謝とともに満たされた感覚を味わう時。" },
+ { t: "満月の下の肥沃な庭", m: "豊かに満ちあふれた感情や成果に包まれ、自然の恩恵を心ゆくまで享受する場面。深い満足感と安らぎを得る時。" },
+ { t: "プリズム", m: "一つの出来事や光を多角的に分解し、多様で美しい色彩（価値観）として表現する場面。豊かな感受性で物事の多面的な魅力を捉える時。" },
+ { t: "巨大な石の顔", m: "自分の中の永遠の理想像やなりたい姿を、揺るぎない確信として静かに完成させる場面。大きな存在感と静かな到達感を抱く時。"}
+
+            ]
+        };
+
+        function getSabianDetails(signIdx, sabianDegree) {
+            const validIdx = (isNaN(signIdx) || signIdx < 0 || signIdx > 11) ? 0 : signIdx;
+            const signObj = ZODIAC_SIGNS[validIdx] || ZODIAC_SIGNS[0];
+            const sign = signObj.name;
+            
+            const degIndex = Math.max(0, Math.min(29, sabianDegree - 1));
+            const signSabians = SABIAN_DATA[sign];
+            
+            if (signSabians && signSabians[degIndex]) {
+                const item = signSabians[degIndex];
+                return {
+                    title: `${sign} ${sabianDegree}度「${item.t}」`,
+                    keyword: item.t,
+                    meaning: item.m
+                };
+            }
+
+            // 万が一データ未定義の度数の場合の汎用メッセージ fallback
+            const defaultKeywords = {
+                '牡羊座': '開拓心・純粋な直感・新しい自分へのスタート',
+                '牡牛座': '豊かな感性・マイペースな美意識・豊かな現実化',
+                '双子座': '軽快な知性・好奇心の探求・柔軟なネットワーク',
+                '蟹座': '深い愛着・仲間への包容力・情緒的な繋がり',
+                '獅子座': '堂々とした自己表現・創造的パッション・華やかな魅力',
+                '乙女座': '誠実な分析力・行き届いた配慮・心身の整え',
+                '天秤座': '美しき調和・洗練された社交性・洗練されたパートナーシップ',
+                '蠍座': '深い魂の絆・本質を見抜く洞察・揺るぎないコミット',
+                '射手座': '高い理想への冒険・おおらかな真理探求・自由への跳躍',
+                '山羊座': '確かな達成力・社会的責任・揺るぎない信頼構造',
+                '水瓶座': '独創的な未来視点・自由な友愛・常識を超える開拓',
+                '魚座': '無条件の愛・深い共感力・霊的な癒しとインスピレーション'
+            };
+
+            return {
+                title: `${sign} ${sabianDegree}度`,
+                keyword: defaultKeywords[sign] || '魂の成長と開花',
+                meaning: `この度数は「${sign}」のエネルギーを${sabianDegree}度のステージ（${defaultKeywords[sign] || ''}）として発揮します。`
+            };
+        }
+
+        // Toggle time input availability
+        function toggleTimeInput() {
+            const isUnknown = document.getElementById('unknownTime').checked;
+            const timeInput = document.getElementById('birthTime');
+            timeInput.disabled = isUnknown;
+            if (isUnknown) {
+                timeInput.classList.add('opacity-40');
+            } else {
+                timeInput.classList.remove('opacity-40');
+            }
+        }
+
+        // Tab switching function
+        function switchTab(tabId) {
+            const tabs = ['tab-profile', 'tab-calendar', 'tab-progress', 'tab-export'];
+            tabs.forEach(t => {
+                const el = document.getElementById(t);
+                const btn = document.getElementById('btn-' + t);
+                if (t === tabId) {
+                    el.classList.remove('hidden');
+                    btn.classList.add('bg-pink-600', 'text-white', 'shadow-md');
+                    btn.classList.remove('bg-slate-800/80', 'text-slate-300');
+                } else {
+                    el.classList.add('hidden');
+                    btn.classList.remove('bg-pink-600', 'text-white', 'shadow-md');
+                    btn.classList.add('bg-slate-800/80', 'text-slate-300');
+                }
+            });
+        }
+
+        // --- Calculate Form Handler ---
+        function handleCalculate(e) {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            try {
+                calculateAstrology();
+            } catch (err) {
+                console.error("Astrology Calculation Error:", err);
+                alert("計算中にエラーが発生しました。日付または時間を再確認してください。");
+            }
+            return false;
+        }
+
+        // Core Astrology Calculation Engine
+        function calculatePlanetLongitude(planet, dateObj) {
+            if (typeof Astronomy === 'undefined' || !dateObj) return 0;
+            try {
+                const d = (dateObj instanceof Date) ? dateObj : new Date(dateObj);
+                const astroTime = Astronomy.MakeTime(d);
+                // Simple planetary longitude via GeoVector or direct Ecliptic longitude calculation
+                if (Astronomy.GeoVector) {
+                    const pos = Astronomy.GeoVector(planet, astroTime, true);
+                    const ecliptic = Astronomy.Ecliptic(pos);
+                    return (ecliptic.elon % 360 + 360) % 360;
+                } else if (Astronomy.EclipticLongitude) {
+                    return (Astronomy.EclipticLongitude(planet, astroTime) % 360 + 360) % 360;
+                }
+                return 0;
+            } catch (err) {
+                console.warn("Calculation fallback for:", planet, err);
+                // Standard fallback calculation approximation if library fails
+                const daysSince2000 = (dateObj.getTime() - new Date(2000, 0, 1).getTime()) / (1000 * 60 * 60 * 24);
+                const approxLons = { Sun: 280 + daysSince2000 * 0.9856, Moon: 218 + daysSince2000 * 13.176, Mercury: 250 + daysSince2000 * 4.09, Venus: 180 + daysSince2000 * 1.6, Mars: 355 + daysSince2000 * 0.524, Jupiter: 34 + daysSince2000 * 0.083, Saturn: 50 + daysSince2000 * 0.033 };
+                return ((approxLons[planet] || 0) % 360 + 360) % 360;
+            }
+        }
+
+        function calculatePlanetaryPositions(dateObj) {
+            const bodies = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn'];
+            const results = {};
+
+            bodies.forEach(bName => {
+                let eclipticLon = calculatePlanetLongitude(bName, dateObj);
+
+                if (isNaN(eclipticLon) || eclipticLon === null || eclipticLon === undefined) {
+                    eclipticLon = 0;
+                }
+
+                // Normalize longitude to 0..360
+                eclipticLon = (eclipticLon % 360 + 360) % 360;
+
+                // Ensure signIndex is strictly between 0 and 11
+                let signIdx = Math.floor(eclipticLon / 30);
+                signIdx = ((signIdx % 12) + 12) % 12;
+
+                const signObj = ZODIAC_SIGNS[signIdx] || ZODIAC_SIGNS[0];
+
+                let degreeInSign = eclipticLon % 30;
+                let sabianDegree = Math.floor(degreeInSign) + 1;
+                if (sabianDegree > 30) sabianDegree = 30;
+
+                results[bName] = {
+                    totalLongitude: eclipticLon,
+                    signIndex: signIdx,
+                    signName: signObj.name,
+                    signSymbol: signObj.symbol,
+                    rawDegree: degreeInSign,
+                    degreeFormatted: `${Math.floor(degreeInSign)}°${Math.floor((degreeInSign % 1) * 60).toString().padStart(2, '0')}'`,
+                    sabianDegree: sabianDegree,
+                    sabianInfo: getSabianDetails(signIdx, sabianDegree)
+                };
+            });
+
+            return results;
+        }
+
+        // Render Planet Grid Cards in Profile Tab
+        function renderPlanetaryGrid(natalPlanets) {
+            const grid = document.getElementById('planetaryProfileGrid');
+            if (!grid) return;
+
+            let html = '';
+            const keys = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn'];
+
+            keys.forEach(k => {
+                const p = natalPlanets[k];
+                const meta = PLANET_METADATA[k];
+                if (!p || !meta) return;
+
+                // 星座ごとの個別解説（signFlavors）が存在すれば上書き取得
+                let descTitle = meta.descTitle;
+                let subTitle = meta.subTitle;
+                let theme = meta.theme;
+
+                if (meta.signFlavors && meta.signFlavors[p.signName]) {
+                    const flavor = meta.signFlavors[p.signName];
+                    if (flavor.descTitle) descTitle = flavor.descTitle;
+                    if (flavor.subTitle) subTitle = flavor.subTitle;
+                    if (flavor.theme) theme = flavor.theme;
+                }
+
+                html += `
+                    <div class="glass-card p-5 rounded-2xl space-y-3 border-t-2 border-pink-500/40 relative">
+                        <div class="flex justify-between items-start border-b border-white/10 pb-2">
+                            <div>
+                                <h4 class="text-sm font-bold text-pink-300 flex items-center gap-1.5">
+                                    <i class="fa-solid ${meta.icon}"></i> ${meta.title}
+                                </h4>
+                                <div class="text-2xl font-bold mt-1 text-slate-100 flex items-center gap-2">
+                                    <span>${p.signSymbol} ${p.signName}</span>
+                                    <span class="text-xs font-mono bg-pink-950/80 px-2.5 py-1 rounded text-pink-200 border border-pink-500/30">${p.degreeFormatted}</span>
+                                </div>
+                            </div>
+                            <div class="text-right bg-slate-900/80 border border-slate-700 px-3 py-1.5 rounded-xl">
+                                <span class="text-[10px] text-slate-400 block">サビアン</span>
+                                <span class="text-xs font-bold text-pink-300">${p.sabianInfo.title}</span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-1.5 text-xs text-slate-200">
+                            <p class="font-semibold text-pink-200 flex items-center gap-1">
+                                <i class="fa-solid fa-sparkles text-amber-300"></i> ${descTitle}
+                            </p>
+                            ${subTitle ? `<p class="text-[11px] text-pink-300/90 font-medium">${subTitle}</p>` : ''}
+                            <p class="text-slate-300 leading-relaxed">${theme}</p>
+                        </div>
+
+                        <div class="bg-slate-950/50 p-2.5 rounded-xl border border-slate-800 text-[11px] text-slate-400">
+                            <span class="text-pink-300 font-bold block mb-0.5">✨ サビアンシンボルの象徴</span>
+                            ${p.sabianInfo.meaning}
+                        </div>
+                    </div>
+                `;
+            });
+
+            grid.innerHTML = html;
+        }
+
+        // Calculate Transit Positions for specific dates
+        function calculateTransitPositions(year) {
+            // Sample mid-year point for major outer/social planets (e.g. July 1st of target year)
+            const midYearDate = new Date(`${year}-07-01T12:00:00Z`);
+            const astroTime = Astronomy.MakeTime(midYearDate);
+
+            // True North Node (Dragon's Head) calculation formula / approximation
+            // T-Node moves backwards ~19.3 degrees per year. J2000 epoch node is approx 125.044 deg.
+            const daysSince2000 = (midYearDate.getTime() - new Date(2000, 0, 1, 12, 0, 0).getTime()) / (1000 * 60 * 60 * 24);
+            let nodeLon = (125.04455 - 0.0529538083 * daysSince2000) % 360;
+            if (nodeLon < 0) nodeLon += 360;
+
+            const tJupiterLon = calculatePlanetLongitude('Jupiter', midYearDate);
+            const tSaturnLon = calculatePlanetLongitude('Saturn', midYearDate);
+            const tVenusLon = calculatePlanetLongitude('Venus', midYearDate);
+
+            return {
+                node: { lon: nodeLon, signIdx: Math.floor(nodeLon / 30) },
+                jupiter: { lon: tJupiterLon, signIdx: Math.floor(tJupiterLon / 30) },
+                saturn: { lon: tSaturnLon, signIdx: Math.floor(tSaturnLon / 30) },
+                venus: { lon: tVenusLon, signIdx: Math.floor(tVenusLon / 30) }
+            };
+        }
+
+        // Helper to check aspect between two longitudes
+        function getAspectInfo(lon1, lon2, orb = 6) {
+            const diff = Math.abs((lon1 - lon2 + 360) % 360);
+            if (Math.abs(diff - 0) <= orb || Math.abs(diff - 360) <= orb) return { name: '合 (0°)', type: 'conjunction', score: 3 };
+            if (Math.abs(diff - 120) <= orb || Math.abs(diff - 240) <= orb) return { name: 'トライン (120°)', type: 'trine', score: 2 };
+            if (Math.abs(diff - 60) <= orb || Math.abs(diff - 300) <= orb) return { name: 'セクスタイル (60°)', type: 'sextile', score: 1 };
+            if (Math.abs(diff - 180) <= orb) return { name: 'オポジション (180°)', type: 'opposition', score: 2 };
+            return null;
+        }
+
+        // Render Dynamic Destiny Calendar with real transit calculations
+        function renderDestinyCalendar(natalPlanets, startYear, yearSpan) {
+            const container = document.getElementById('destinyCalendarTimeline');
+            const label = document.getElementById('calendarPeriodLabel');
+            if (!container) return;
+
+            if (label) {
+                label.innerText = `${startYear}年〜${startYear + yearSpan - 1}年`;
+            }
+
+            let html = '';
+
+            for (let y = startYear; y < startYear + yearSpan; y++) {
+                const transits = calculateTransitPositions(y);
+                const events = [];
+
+                // 1. Dragon's Head Triggers
+                const nodeVenusAspect = getAspectInfo(transits.node.lon, natalPlanets.Venus.totalLongitude, 8);
+                const nodeSunAspect = getAspectInfo(transits.node.lon, natalPlanets.Sun.totalLongitude, 8);
+                const nodeMoonAspect = getAspectInfo(transits.node.lon, natalPlanets.Moon.totalLongitude, 8);
+
+                if (nodeVenusAspect) {
+                    events.push({
+                        title: `Tドラゴンヘッド × N金星 ${nodeVenusAspect.name}`,
+                        badge: '運命のソウルメイト期',
+                        badgeColor: 'bg-pink-950 text-pink-300 border-pink-500/30',
+                        icon: 'fa-solid fa-heart-circle-bolt text-pink-400',
+                        desc: `ドラゴンヘッドが金星（${natalPlanets.Venus.signName}）と${nodeVenusAspect.name}を形成。過去からの約束を感じるような特別な出会いや、電撃的な惹き合いが生じやすい最大のモテ・引き寄せ年です。`
+                    });
+                } else if (nodeSunAspect || nodeMoonAspect) {
+                    const planetTarget = nodeSunAspect ? 'N太陽' : 'N月';
+                    const aspectObj = nodeSunAspect || nodeMoonAspect;
+                    events.push({
+                        title: `Tドラゴンヘッド × ${planetTarget} ${aspectObj.name}`,
+                        badge: '縁の活性化・人生の節目',
+                        badgeColor: 'bg-purple-950 text-purple-300 border-purple-500/30',
+                        icon: 'fa-solid fa-infinity text-purple-300',
+                        desc: `縁を司るドラゴンヘッドがあなたの根幹（${planetTarget}）を刺激します。一生もののパートナーシップや、キーパーソンとの重要な引き寄せが起こる1年です。`
+                    });
+                }
+
+                // 2. Jupiter Expansion & Venus Return
+                const jupiterSunAspect = getAspectInfo(transits.jupiter.lon, natalPlanets.Sun.totalLongitude, 7);
+                const jupiterVenusAspect = getAspectInfo(transits.jupiter.lon, natalPlanets.Venus.totalLongitude, 7);
+                const jupiterSign = ZODIAC_SIGNS[transits.jupiter.signIdx]?.name || '';
+
+                if (jupiterVenusAspect) {
+                    events.push({
+                        title: `T木星（${jupiterSign}）× N金星 ${jupiterVenusAspect.name}`,
+                        badge: '12年に一度の愛の発展・祝福期',
+                        badgeColor: 'bg-amber-950 text-amber-300 border-amber-500/30',
+                        icon: 'fa-solid fa-crown text-amber-300',
+                        desc: `幸運の木星が愛の金星に${jupiterVenusAspect.name}で光を照射。交際中の発展・プロポーズ・結婚の成就など、二人を取り巻く環境が幸福感で満たされる大幸運期です。`
+                    });
+                } else if (jupiterSunAspect) {
+                    events.push({
+                        title: `T木星 × N太陽 ${jupiterSunAspect.name}`,
+                        badge: '自己開花・理想のパートナー獲得',
+                        badgeColor: 'bg-amber-950 text-amber-300 border-amber-500/30',
+                        icon: 'fa-solid fa-wand-magic-sparkles text-amber-400',
+                        desc: `あなたの魅力と自信が大きく広がり、理想的なお相手を引き寄せる力が最高潮に。共同経営者のような最高のパートナー像が見つかる年です。`
+                    });
+                } else {
+                    events.push({
+                        title: `T木星（${jupiterSign}）巡行`,
+                        badge: '運気拡大のサポーター期',
+                        badgeColor: 'bg-indigo-950 text-indigo-300 border-indigo-500/30',
+                        icon: 'fa-solid fa-gem text-indigo-300',
+                        desc: `木星が${jupiterSign}を運行し、視野や交友関係が豊かに広がる時期。素のあなたをありのまま受け止めてくれる理解者との出会いが期待できます。`
+                    });
+                }
+
+                // 3. Saturn Commitment/Anchor
+                const saturnSunAspect = getAspectInfo(transits.saturn.lon, natalPlanets.Sun.totalLongitude, 6);
+                const saturnVenusAspect = getAspectInfo(transits.saturn.lon, natalPlanets.Venus.totalLongitude, 6);
+
+                if (saturnSunAspect || saturnVenusAspect) {
+                    const targetName = saturnVenusAspect ? 'N金星' : 'N太陽';
+                    const aspName = (saturnVenusAspect || saturnSunAspect).name;
+                    events.push({
+                        title: `T土星 × ${targetName} ${aspName}`,
+                        badge: '真剣交際・絆の確立期',
+                        badgeColor: 'bg-blue-950 text-blue-300 border-blue-500/30',
+                        icon: 'fa-solid fa-shield-halved text-blue-400',
+                        desc: `試練と定着の土星がアスペクトを形成。誠実で信頼できるお相手との固い契約（入籍・同棲など）が現実味を帯びる、地に足の着いた絆形成の時期です。`
+                    });
+                }
+
+                // Fallback default message if events list is small
+                if (events.length === 1) {
+                    events.push({
+                        title: `Tドラゴンヘッドが${ZODIAC_SIGNS[transits.node.signIdx]?.name || ''}エリアを運行`,
+                        badge: '内面の調和・グラウンディング期',
+                        badgeColor: 'bg-emerald-950 text-emerald-300 border-emerald-500/30',
+                        icon: 'fa-solid fa-seedling text-emerald-400',
+                        desc: `じっくりと自分自身の内面を育み、安心できる居場所を作る時期。心の余裕が、次に訪れる運命的な引き寄せの最高の準備となります。`
+                    });
+                }
+
+                html += `
+                    <div class="glass-panel p-5 rounded-2xl space-y-3 border-l-4 border-pink-500">
+                        <div class="flex justify-between items-center border-b border-white/10 pb-2 flex-wrap gap-2">
+                            <h4 class="text-lg font-bold text-pink-300 flex items-center gap-2">
+                                <i class="fa-regular fa-calendar-check text-pink-400"></i> 【${y}年】 の運命＆引き寄せトリガー
+                            </h4>
+                            <span class="text-xs font-mono text-slate-300 bg-slate-900/80 px-3 py-1 rounded-full border border-slate-700">
+                                Tヘッド:${ZODIAC_SIGNS[transits.node.signIdx]?.symbol}${ZODIAC_SIGNS[transits.node.signIdx]?.name} / T木星:${ZODIAC_SIGNS[transits.jupiter.signIdx]?.symbol}${ZODIAC_SIGNS[transits.jupiter.signIdx]?.name}
+                            </span>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                            ${events.map(ev => `
+                                <div class="bg-slate-900/60 p-3.5 rounded-xl border border-slate-800 space-y-1.5 relative">
+                                    <div class="flex justify-between items-center gap-2 border-b border-white/5 pb-1">
+                                        <span class="font-bold text-pink-200 flex items-center gap-1.5 text-xs">
+                                            <i class="${ev.icon}"></i> ${ev.title}
+                                        </span>
+                                        <span class="text-[10px] px-2 py-0.5 rounded-full border font-semibold ${ev.badgeColor}">${ev.badge}</span>
+                                    </div>
+                                    <p class="text-slate-300 leading-relaxed text-[11px]">${ev.desc}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        // Main Calculation Execution
+        function calculateAstrology() {
+            const clientName = document.getElementById('clientName').value || '相談者様';
+            const birthDateVal = document.getElementById('birthDate').value;
+            const unknownTime = document.getElementById('unknownTime').checked;
+            const birthTimeVal = unknownTime ? '12:00' : (document.getElementById('birthTime').value || '12:00');
+            const startYear = parseInt(document.getElementById('startYear').value) || 2025;
+            const yearSpan = parseInt(document.getElementById('yearSpan').value) || 5;
+
+            if (!birthDateVal) {
+                alert('生年月日を入力してください');
+                return;
+            }
+
+            const birthDateTimeStr = `${birthDateVal}T${birthTimeVal}:00`;
+            const birthDateObj = new Date(birthDateTimeStr);
+
+            // 1. Calculate Natal Positions
+            const natalPlanets = calculatePlanetaryPositions(birthDateObj);
+
+            // Update Profile UI
+            document.getElementById('outputClientName').innerText = `${clientName} の運命プロファイル`;
+            document.getElementById('outputBirthDetail').innerText = `生年月日: ${birthDateVal} ${unknownTime ? '(時間不明 12:00計算)' : birthTimeVal}`;
+
+            renderPlanetaryGrid(natalPlanets);
+
+            // 2. Generate Yearly Destiny Calendar
+            renderDestinyCalendar(natalPlanets, startYear, yearSpan);
+
+            // 3. Generate Progress Analysis
+            const progressData = renderProgressAnalysis(birthDateObj, natalPlanets, unknownTime, startYear, yearSpan);
+
+            // 4. Generate Export Summary Text
+            generateExportSummary(clientName, birthDateVal, natalPlanets, startYear, yearSpan, progressData);
+        }
+
+        function renderProgressAnalysis(birthDateObj, natalPlanets, unknownTime, startYear, yearSpan) {
+            const area = document.getElementById('progressOutputArea');
+            const statusEl = document.getElementById('progressTimeStatus');
+
+            if (!area) return null;
+
+            if (statusEl) {
+                if (unknownTime) {
+                    statusEl.innerText = '出生時間不明（概算表示）';
+                    statusEl.className = 'text-xs bg-amber-900/50 text-amber-200 px-2.5 py-1 rounded-full border border-amber-500/30';
+                } else {
+                    statusEl.innerText = '出生時間あり（精度高）';
+                    statusEl.className = 'text-xs bg-purple-900/50 text-purple-200 px-2.5 py-1 rounded-full border border-purple-500/30';
+                }
+            }
+
+            // Calculate Progressed Positions (1 Day = 1 Year secondary progression)
+            // Progress target = selected start year or current year
+            const currentYear = new Date().getFullYear();
+            const calcYear = startYear || currentYear;
+            const ageAtTarget = calcYear - birthDateObj.getFullYear();
+            const progressedDays = ageAtTarget >= 0 ? ageAtTarget : 0;
+            
+            // Progressed Date: birth + ageInDays
+            const progressedDate = new Date(birthDateObj.getTime() + progressedDays * 24 * 60 * 60 * 1000);
+            const pPlanets = calculatePlanetaryPositions(progressedDate);
+
+            // 1. Render 4 Progressed Main Planets Grid
+            const progKeys = ['Sun', 'Moon', 'Mercury', 'Venus'];
+            let gridHtml = `
+                <div>
+                    <div class="flex justify-between items-center mb-3">
+                        <h4 class="text-sm font-bold text-purple-200 flex items-center gap-2">
+                            <i class="fa-solid fa-compass text-pink-400"></i> ${calcYear}年（約${ageAtTarget}歳時点）のプログレス主要4天体 現在地
+                        </h4>
+                        <span class="text-[11px] font-mono text-slate-400 bg-slate-900/80 px-2.5 py-0.5 rounded-full border border-slate-700">1日1年進行法</span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            `;
+
+            progKeys.forEach(k => {
+                const p = pPlanets[k];
+                const meta = PROGRESS_PLANET_METADATA[k];
+                if (!p || !meta) return;
+
+                gridHtml += `
+           <div class="glass-card p-4 rounded-2xl space-y-3 border-t-2 border-purple-500/40 relative overflow-hidden">
+        <div class="border-b border-white/10 pb-3 space-y-2">
+            <!-- 天体名と度数 -->
+            <div class="flex justify-between items-start">
+                <span class="text-xs font-semibold text-purple-300 flex items-center gap-1.5">
+                    <i class="fa-solid ${meta.icon}"></i> ${meta.title}
+                </span>
+                <span class="text-xs font-mono bg-purple-950/80 px-2 py-0.5 rounded text-pink-200 border border-purple-500/30">${p.degreeFormatted}</span>
+            </div>
+            <div class="text-xl font-bold text-slate-100">
+                <span>${p.signSymbol} ${p.signName}</span>
+            </div>
+            
+            <!-- 🌟 サビアンタイトルを右上の窮屈な場所から出し、ここに余裕を持たせて配置！ -->
+            <div class="bg-slate-900/90 border border-slate-700/80 px-3 py-2 rounded-xl">
+                <span class="text-[10px] text-slate-400 block mb-0.5">サビアン度数</span>
+                <span class="text-xs font-bold text-pink-300 leading-snug block">${p.sabianInfo.title}</span>
+            </div>
+        </div>
+
+        <p class="text-xs text-slate-300 leading-relaxed pt-1">
+            ${meta.desc(p.signName)}
+        </p>
+
+        <div class="bg-purple-950/40 p-2.5 rounded-xl border border-purple-500/20 text-[11px] text-slate-300">
+            <span class="text-purple-300 font-bold block mb-0.5">🔮 プログレスサビアンのテーマ</span>
+            ${p.sabianInfo.meaning}
+        </div>
+    </div>
+                `;
+            });
+            gridHtml += `</div></div>`;
+
+            // 2. Calculate Progress Opportunities (Timeline analysis for span years)
+            const opportunities = calculateProgressOpportunities(birthDateObj, natalPlanets, startYear, yearSpan);
+
+            let oppHtml = `
+                <div class="glass-panel p-5 rounded-2xl space-y-4 border-l-4 border-pink-500">
+                    <div>
+                        <h4 class="text-base font-bold text-pink-300 flex items-center gap-2">
+                            <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i> プログレス分析：恋のチャンス期・転換期（${startYear}年〜${startYear + yearSpan - 1}年）
+                        </h4>
+                        <p class="text-xs text-slate-400 mt-1">
+                            P月・P金星とネイタル天体のアスペクト形成、およびサイン移動（イングレス）から自動抽出した重要期です。
+                        </p>
+                    </div>
+
+                    <div class="space-y-3">
+            `;
+
+            if (!opportunities || opportunities.length === 0) {
+                oppHtml += `
+                    <div class="p-4 bg-slate-900/50 rounded-xl text-xs text-slate-400 text-center">
+                        この期間は安定したグラウンディング期です。内面を整えることで次の引き寄せ期への準備が進みます。
+                    </div>
+                `;
+            } else {
+                opportunities.forEach(op => {
+                    oppHtml += `
+                        <div class="bg-slate-900/60 p-3.5 rounded-xl border border-slate-800 text-xs space-y-1.5 relative">
+                            <div class="flex flex-wrap justify-between items-center gap-2">
+                                <span class="font-bold text-pink-200 text-sm flex items-center gap-1.5">
+                                    <i class="fa-solid ${op.icon}"></i> 【${op.year}年頃】 ${op.title}
+                                </span>
+                                <span class="text-[10px] bg-pink-950 text-pink-300 px-2.5 py-0.5 rounded-full border border-pink-500/30 font-semibold">${op.tag}</span>
+                            </div>
+                            <p class="text-slate-300 leading-relaxed">${op.description}</p>
+                        </div>
+                    `;
+                });
+            }
+
+            oppHtml += `
+                    </div>
+                </div>
+            `;
+
+            area.innerHTML = gridHtml + oppHtml;
+
+            return {
+                pPlanets: pPlanets,
+                calcYear: calcYear,
+                opportunities: opportunities
+            };
+        }
+
+        // Helper to calculate progress aspects and ingresses
+        function calculateProgressOpportunities(birthDateObj, natalPlanets, startYear, yearSpan) {
+            const list = [];
+            const birthYear = birthDateObj.getFullYear();
+
+            for (let y = startYear; y < startYear + yearSpan; y++) {
+                const age = y - birthYear;
+                if (age < 0) continue;
+
+                // Progress date for this year
+                const pDateCurr = new Date(birthDateObj.getTime() + age * 24 * 60 * 60 * 1000);
+                const pDatePrev = new Date(birthDateObj.getTime() + Math.max(0, age - 1) * 24 * 60 * 60 * 1000);
+
+                const pCurr = calculatePlanetaryPositions(pDateCurr);
+                const pPrev = calculatePlanetaryPositions(pDatePrev);
+
+                // Check 1: P-Moon Sign Ingress
+                if (pCurr.Moon.signIndex !== pPrev.Moon.signIndex) {
+                    list.push({
+                        year: y,
+                        icon: 'fa-arrows-rotate text-purple-400',
+                        tag: '感情のテーマシフト',
+                        title: `P月が「${pCurr.Moon.signName}」へサイン移動`,
+                        description: `約2.5年ぶりに心のモードが「${pCurr.Moon.signName}」へと切り替わります。新しい関係性や愛の受け取り方を心から求めるようになり、出会いのアンテナが大きく拡がる時期です。`
+                    });
+                }
+
+                // Check 2: P-Moon aspect with N-Venus / N-Sun (approximate angular closeness)
+                const pMoonLon = pCurr.Moon.totalLongitude;
+                const nVenusLon = natalPlanets.Venus.totalLongitude;
+                const nSunLon = natalPlanets.Sun.totalLongitude;
+
+                // Function to check aspect near 0 (conjunction), 120 (trine), 60 (sextile)
+                function isAspecting(lon1, lon2) {
+                    const diff = Math.abs((lon1 - lon2 + 360) % 360);
+                    return (diff < 5 || Math.abs(diff - 120) < 5 || Math.abs(diff - 240) < 5 || Math.abs(diff - 60) < 5 || Math.abs(diff - 300) < 5);
+                }
+
+                if (isAspecting(pMoonLon, nVenusLon)) {
+                    list.push({
+                        year: y,
+                        icon: 'fa-heart text-pink-400',
+                        tag: 'パートナーシップ黄金期',
+                        title: 'P月 × N金星 イージーアスペクト（受容力・愛され期のピーク）',
+                        description: 'あなたの心が愛を受け取る準備が整い、自然体で甘えられる最高の引き寄せ期。ソウルメイトとの出会いや、一気に関係が進展する大チャンスです。'
+                    });
+                }
+
+                if (isAspecting(pMoonLon, nSunLon)) {
+                    list.push({
+                        year: y,
+                        icon: 'fa-sun text-amber-400',
+                        tag: '人生の決意・結婚期',
+                        title: 'P月 × N太陽 調和アスペクト（内面と目的の統合）',
+                        description: '自分の目指す人生観と感情の方向性がぴったりと合致する時期。結婚や将来を共にする大きな決断・人生の節目が訪れやすいタイミングです。'
+                    });
+                }
+
+                // Check 3: P-Venus Ingress
+                if (pCurr.Venus.signIndex !== pPrev.Venus.signIndex) {
+                    list.push({
+                        year: y,
+                        icon: 'fa-sparkles text-pink-300',
+                        tag: '愛のスタイル更新',
+                        title: `P金星が「${pCurr.Venus.signName}」へ移動`,
+                        description: `恋愛観とあなた自身の魅力の輝き方が「${pCurr.Venus.signName}」のスタイルへとアップデート。好きなタイプや心ときめく場面が変化するキーイヤーです。`
+                    });
+                }
+            }
+
+            // If list is too sparse, add a general supportive item
+            if (list.length === 0) {
+                list.push({
+                    year: startYear,
+                    icon: 'fa-seedling text-emerald-400',
+                    tag: '愛の土壌育成期',
+                    title: 'プログレス内面の蓄積期',
+                    description: '自分自身の心のベースと素の自分を愛する大切な時期。内面をしっかり労わることで、次に来るアスペクト形成期の引き寄せ力が倍増します。'
+                });
+            }
+
+            return list;
+        }
+
+        function generateExportSummary(clientName, birthDateVal, natalPlanets, startYear, yearSpan, progressData) {
+            const textarea = document.getElementById('summaryTextarea');
+            if (!textarea) return;
+
+            let summary = `【✨ ${clientName} 様 運命の恋愛・パートナーシップ鑑定書 ✨】\n`;
+            summary += `生年月日: ${birthDateVal}\n`;
+            summary += `-------------------------------------------\n\n`;
+            summary += `■ 1. 出生図が示す「運命の相手像」とサビアン\n\n`;
+
+            const keys = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn'];
+            keys.forEach(k => {
+                const p = natalPlanets[k];
+                const meta = PLANET_METADATA[k];
+                if (!p || !meta) return;
+
+                summary += `● ${meta.title}\n`;
+                summary += `  配置: ${p.signSymbol} ${p.signName} ${p.degreeFormatted} (サビアン: ${p.sabianInfo ? p.sabianInfo.title : ''})\n`;
+                
+                let theme = meta.theme;
+                if (meta.signFlavors && meta.signFlavors[p.signName] && meta.signFlavors[p.signName].theme) {
+                    theme = meta.signFlavors[p.signName].theme;
+                }
+                summary += `  象徴: ${theme}\n\n`;
+            });
+
+            summary += `-------------------------------------------\n`;
+            summary += `■ 2. 年別 運命の出会い・引き寄せカレンダー (${startYear}年〜${startYear + yearSpan - 1}年)\n\n`;
+            for (let y = startYear; y < startYear + yearSpan; y++) {
+                summary += `【${y}年】\n`;
+                summary += `・Tドラゴンヘッド・T木星・T土星のトランジット連携による愛の引き寄せ期\n\n`;
+            }
+
+            summary += `-------------------------------------------\n`;
+            summary += `■ 3. プログレス主要4天体＆内面の準備期 (${progressData ? progressData.calcYear : startYear}年時点)\n\n`;
+            if (progressData && progressData.pPlanets) {
+                const progKeys = ['Sun', 'Moon', 'Mercury', 'Venus'];
+                progKeys.forEach(k => {
+                    const p = progressData.pPlanets[k];
+                    const meta = PROGRESS_PLANET_METADATA[k];
+                    if (p && meta) {
+                        summary += `・${meta.title}: ${p.signSymbol} ${p.signName} ${p.degreeFormatted}\n`;
+                    }
+                });
+                summary += `\n【恋のチャンス期・転換期】\n`;
+                if (progressData.opportunities && progressData.opportunities.length > 0) {
+                    progressData.opportunities.forEach(op => {
+                        summary += `・[${op.year}年] ${op.title}\n  ${op.description}\n`;
+                    });
+                }
+            } else {
+                summary += `・心がパートナーシップに向かう黄金期。過去のパターンをリセットし、愛を受け取る準備が完成しています。\n`;
+            }
+
+            textarea.value = summary;
+        }
+
+        function copySummaryText() {
+            const textarea = document.getElementById('summaryTextarea');
+            textarea.select();
+            document.execCommand('copy');
+            alert('鑑定サマリーをクリップボードにコピーしました！そのままチャット占い等で送信できます。');
+        }
+
+        window.onload = function() {
+            // Trigger default initial calculation
+            calculateAstrology();
+        };
+    </script>
+</body>
+</html>
