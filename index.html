@@ -2626,7 +2626,7 @@ function calculateTransitPositionsForMonth(year, monthIndex) {
 
 
 // Helper to check aspect between two longitudes (全5主要アスペクト対応)
-function getAspectInfo(lon1, lon2, defaultOrb = 6) {
+function getAspectInfo(lon1, lon2, defaultOrb = 4) {
     let diff = Math.abs(lon1 - lon2) % 360;
     if (diff > 180) diff = 360 - diff;
 
@@ -2683,13 +2683,13 @@ function renderDestinyCalendar(natalPlanets, startYear, yearSpan) {
     };
 
     const transitConfig = [
-        { key: 'node', label: 'Tドラゴンヘッド', icon: 'fa-solid fa-infinity', color: 'bg-purple-950 text-purple-300 border-purple-500/30', keyword: '運命の出会い・ソウルメイトの引き寄せ', orb: 8 },
-        { key: 'southNode', label: 'Tドラゴンテイル', icon: 'fa-solid fa-link text-purple-400', color: 'bg-purple-950 text-purple-300 border-purple-500/30', keyword: '懐かしい再会・過去からの約束・解体と統合', orb: 8 },
-        { key: 'jupiter', label: 'T木星', icon: 'fa-solid fa-crown text-amber-300', color: 'bg-amber-950 text-amber-300 border-amber-500/30', keyword: '愛の拡大・結婚・祝福の大幸運期', orb: 7 },
-        { key: 'saturn', label: 'T土星', icon: 'fa-solid fa-shield-halved text-blue-400', color: 'bg-blue-950 text-blue-300 border-blue-500/30', keyword: '絆の確立・真剣交際・責任ある契約', orb: 6 },
-        { key: 'uranus', label: 'T天王星', icon: 'fa-solid fa-bolt text-cyan-300', color: 'bg-cyan-950 text-cyan-300 border-cyan-500/30', keyword: '電撃的な恋・急展開・固定観念の打破', orb: 6 },
-        { key: 'neptune', label: 'T海王星', icon: 'fa-solid fa-wand-magic-sparkles text-teal-300', color: 'bg-teal-950 text-teal-300 border-teal-500/30', keyword: 'ロマンチックな夢・無条件の愛・奇跡の同調', orb: 6 },
-        { key: 'pluto', label: 'T冥王星', icon: 'fa-solid fa-fire text-rose-400', color: 'bg-rose-950 text-rose-300 border-rose-500/30', keyword: '宿命的な変容・人生を変える愛・強烈な惹かれ合い', orb: 6 }
+        { key: 'node', label: 'Tドラゴンヘッド', icon: 'fa-solid fa-infinity', color: 'bg-purple-950 text-purple-300 border-purple-500/30', keyword: '運命の出会い・ソウルメイトの引き寄せ', orb: 4 },
+        { key: 'southNode', label: 'Tドラゴンテイル', icon: 'fa-solid fa-link text-purple-400', color: 'bg-purple-950 text-purple-300 border-purple-500/30', keyword: '懐かしい再会・過去からの約束・解体と統合', orb: 4 },
+        { key: 'jupiter', label: 'T木星', icon: 'fa-solid fa-crown text-amber-300', color: 'bg-amber-950 text-amber-300 border-amber-500/30', keyword: '愛の拡大・結婚・祝福の大幸運期', orb: 4 },
+        { key: 'saturn', label: 'T土星', icon: 'fa-solid fa-shield-halved text-blue-400', color: 'bg-blue-950 text-blue-300 border-blue-500/30', keyword: '絆の確立・真剣交際・責任ある契約', orb: 3 },
+        { key: 'uranus', label: 'T天王星', icon: 'fa-solid fa-bolt text-cyan-300', color: 'bg-cyan-950 text-cyan-300 border-cyan-500/30', keyword: '電撃的な恋・急展開・固定観念の打破', orb: 3 },
+        { key: 'neptune', label: 'T海王星', icon: 'fa-solid fa-wand-magic-sparkles text-teal-300', color: 'bg-teal-950 text-teal-300 border-teal-500/30', keyword: 'ロマンチックな夢・無条件の愛・奇跡の同調', orb: 3 },
+        { key: 'pluto', label: 'T冥王星', icon: 'fa-solid fa-fire text-rose-400', color: 'bg-rose-950 text-rose-300 border-rose-500/30', keyword: '宿命的な変容・人生を変える愛・強烈な惹かれ合い', orb: 3 }
     ];
 
     let html = '';
