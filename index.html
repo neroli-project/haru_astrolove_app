@@ -2337,8 +2337,8 @@ const LOVE_NATAL_ASPECT_MEANINGS = {
         }
 
       function calculatePlanetaryPositions(dateObj) {
-    // 1. 基本の7天体
-    const bodies = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn'];
+   // 修正後（Uranus, Neptune, Plutoを追加！）
+const bodies = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
     const results = {};
 
     // 2. 基本天体の計算処理
@@ -2482,12 +2482,12 @@ const LOVE_NATAL_ASPECT_MEANINGS = {
             };
 
             const aspectTypes = [
-                { type: 'conjunction', name: '合 (0°)', angle: 0, orb: 7, symbol: '☌' },
-                { type: 'sextile', name: 'セクスタイル (60°)', angle: 60, orb: 6, symbol: '⚹' },
-                { type: 'square', name: 'スクエア (90°)', angle: 90, orb: 6, symbol: '□' },
-                { type: 'trine', name: 'トライン (120°)', angle: 120, orb: 7, symbol: '△' },
-                { type: 'opposition', name: 'オポジション (180°)', angle: 180, orb: 7, symbol: '☍' }
-            ];
+    { type: 'conjunction', name: '合 (0°)', angle: 0, orb: 3.0, symbol: '☌' },
+    { type: 'sextile', name: 'セクスタイル (60°)', angle: 60, orb: 2.0, symbol: '⚹' },
+    { type: 'square', name: 'スクエア (90°)', angle: 90, orb: 3.0, symbol: '□' },
+    { type: 'trine', name: 'トライン (120°)', angle: 120, orb: 3.0, symbol: '△' },
+    { type: 'opposition', name: 'オポジション (180°)', angle: 180, orb: 3.0, symbol: '☍' }
+];
 
             const ageRangeMap = {
                 '太陽': '太陽期 (25〜35歳頃)',
@@ -2520,8 +2520,8 @@ const LOVE_NATAL_ASPECT_MEANINGS = {
                     if (diff > 180) diff = 360 - diff;
 
                     for (const asp of aspectTypes) {
-                        const targetOrb = (asp.type === 'square') ? 6 : asp.orb;
-                        if (Math.abs(diff - asp.angle) <= targetOrb) {
+    const targetOrb = asp.orb; // そのまま使う
+    if (Math.abs(diff - asp.angle) <= targetOrb) {
                             const name1 = planetKeysMap[k1];
                             const name2 = planetKeysMap[k2];
                             if (!name1 || !name2) continue;
@@ -2887,8 +2887,9 @@ for (let y = startYear; y < startYear + yearSpan; y++) {
                 return;
             }
 
-            const birthDateTimeStr = `${birthDateVal}T${birthTimeVal}:00`;
-            const birthDateObj = new Date(birthDateTimeStr);
+           // 修正後：末尾に "+09:00" を追加して、日本時間であることを明示する！
+const birthDateTimeStr = `${birthDateVal}T${birthTimeVal}:00+09:00`;
+const birthDateObj = new Date(birthDateTimeStr);
 
             // 1. Calculate Natal Positions
             const natalPlanets = calculatePlanetaryPositions(birthDateObj);
@@ -3160,13 +3161,13 @@ function generateExportSummary(clientName, birthDateVal, natalPlanets, startYear
                 'Node': 'ドラゴンヘッド', 'SouthNode': 'ドラゴンテイル'
             };
 
-            const aspectTypes = [
-                { type: 'conjunction', name: '合 (0°)', angle: 0, orb: 7, symbol: '☌' },
-                { type: 'sextile', name: 'セクスタイル (60°)', angle: 60, orb: 6, symbol: '⚹' },
-                { type: 'square', name: 'スクエア (90°)', angle: 90, orb: 6, symbol: '□' },
-                { type: 'trine', name: 'トライン (120°)', angle: 120, orb: 7, symbol: '△' },
-                { type: 'opposition', name: 'オポジション (180°)', angle: 180, orb: 7, symbol: '☍' }
-            ];
+           const aspectTypes = [
+    { type: 'conjunction', name: '合 (0°)', angle: 0, orb: 4, symbol: '☌' },
+    { type: 'sextile', name: 'セクスタイル (60°)', angle: 60, orb: 4, symbol: '⚹' },
+    { type: 'square', name: 'スクエア (90°)', angle: 90, orb: 3.5, symbol: '□' }, // ハードアスペクトは少しタイトにするのもアリです
+    { type: 'trine', name: 'トライン (120°)', angle: 120, orb: 4, symbol: '△' },
+    { type: 'opposition', name: 'オポジション (180°)', angle: 180, orb: 4, symbol: '☍' }
+];
 
             // 年齢域マッピング
             const ageRangeMap = {
@@ -3199,9 +3200,10 @@ function generateExportSummary(clientName, birthDateVal, natalPlanets, startYear
                     let diff = Math.abs(p1.totalLongitude - p2.totalLongitude);
                     if (diff > 180) diff = 360 - diff;
 
-                    for (const asp of aspectTypes) {
-                        const targetOrb = (asp.type === 'square') ? 6 : asp.orb;
-                        if (Math.abs(diff - asp.angle) <= targetOrb) {
+                   for (const asp of aspectTypes) {
+    // 定義した asp.orb（またはスクエア用のタイトな値）をそのまま使う！
+    const targetOrb = asp.orb; 
+    if (Math.abs(diff - asp.angle) <= targetOrb) {
                             const name1 = planetKeysMap[k1];
                             const name2 = planetKeysMap[k2];
                             if (!name1 || !name2) continue;
@@ -3226,7 +3228,7 @@ function generateExportSummary(clientName, birthDateVal, natalPlanets, startYear
                                 symbol: asp.symbol,
                                 desc: desc
                             });
-                            break;
+                            
                         }
                     }
                 }
